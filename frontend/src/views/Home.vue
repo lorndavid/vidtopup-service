@@ -609,35 +609,38 @@ onUnmounted(() => {
       >
         <!-- ─── FEATURED GAMES (Top Games 🇰🇭) ─── -->
         <div v-if="featured.length > 0" ref="featuredRef">
-          <div class="flex items-center justify-between mb-4 sm:mb-6">
-            <div class="flex items-center gap-3">
-              <div class="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
+          <div class="flex items-center justify-between mb-3 sm:mb-6">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+              <div class="w-1.5 h-5 sm:h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
               <div>
-                <h2 class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
                   Top Games 🇰🇭
-                  <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
+                  <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
                     Fast Delivery
                   </span>
                 </h2>
-                <p class="text-xs text-slate-400">Official Cambodian server support &amp; instant KHQR Bakong top-up</p>
+                <p class="text-[11px] sm:text-xs text-slate-400">Official Cambodian server support &amp; instant KHQR Bakong top-up</p>
               </div>
             </div>
+            <span class="sm:hidden text-[10px] font-medium text-slate-400 flex items-center gap-0.5 shrink-0">
+              Scroll &rarr;
+            </span>
           </div>
 
-          <!-- Clean Responsive Grid (Identical layout to All Games) -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+          <!-- Mobile: Smooth Horizontal Scroll | Tablet/Desktop: Clean 6-Column Grid -->
+          <div class="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4 overflow-x-auto sm:overflow-x-visible pb-2.5 sm:pb-0 scrollbar-none snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
             <div
               v-for="game in featured"
               :key="game.game_code"
-              class="featured-card-item"
+              class="featured-card-item w-[130px] sm:w-auto shrink-0 snap-start"
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/70 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.22)] hover:-translate-y-1 block select-none"
+                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/70 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.22)] hover:-translate-y-1 block select-none h-full"
               >
                 <!-- Badge for Top Games -->
-                <div class="absolute top-2 left-2 z-10">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-[#FF385C] to-[#FF5E3A] text-white shadow-md">
+                <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10">
+                  <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold bg-gradient-to-r from-[#FF385C] to-[#FF5E3A] text-white shadow-md">
                     Top Pick
                   </span>
                 </div>
@@ -652,13 +655,13 @@ onUnmounted(() => {
                   <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"></div>
                 </div>
 
-                <div class="p-2.5 sm:p-3 bg-[#131926]/90">
-                  <h3 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
+                <div class="p-2 sm:p-3 bg-[#131926]/90">
+                  <h3 class="text-[11px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
                     {{ game.name }}
                   </h3>
-                  <div class="flex items-center gap-1.5 mt-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-[10px] font-medium text-slate-400">Instant Delivery</span>
+                  <div class="flex items-center gap-1 mt-1 sm:mt-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+                    <span class="text-[9px] sm:text-[10px] font-medium text-slate-400 truncate">Instant Delivery</span>
                   </div>
                 </div>
               </div>
@@ -765,7 +768,7 @@ onUnmounted(() => {
 
           <div
             v-if="filteredOthers.length > 0"
-            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
+            class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4"
           >
             <div
               v-for="game in filteredOthers"
@@ -774,7 +777,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.16)] hover:-translate-y-1 block select-none"
+                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.16)] hover:-translate-y-1 block select-none h-full"
               >
                 <div class="aspect-[4/3] overflow-hidden bg-[#0B0F17] relative">
                   <img
@@ -787,15 +790,15 @@ onUnmounted(() => {
                     class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"
                   ></div>
                 </div>
-                <div class="p-2.5 sm:p-3 bg-[#131926]/90">
+                <div class="p-1.5 sm:p-3 bg-[#131926]/90">
                   <p
-                    class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
+                    class="text-[10px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
                   >
                     {{ game.name }}
                   </p>
-                  <div class="flex items-center gap-1.5 mt-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-[10px] font-medium text-slate-400">Instant Delivery</span>
+                  <div class="flex items-center gap-1 mt-1 sm:mt-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+                    <span class="text-[9px] sm:text-[10px] font-medium text-slate-400 truncate">Instant Delivery</span>
                   </div>
                 </div>
               </div>
