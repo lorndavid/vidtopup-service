@@ -62,7 +62,7 @@ const banners: BannerSlide[] = [
     title: 'Free Fire Diamonds',
     subtitle: 'Exclusive Bundles & Weekly Passes at the Best Prices',
     cta: 'Shop Now',
-    ctaGameCode: 'freefire_sgmy',
+    ctaGameCode: 'freefire_kh',
   },
 ]
 const activeBanner = ref(0)
@@ -224,27 +224,58 @@ function navigateToGame(gameCode: string) {
 }
 
 function processGameCategories(data: CambodiaGamesResponse) {
-  let featuredList = [...data.featured]
-  let othersList = [...data.others]
+  const all = [...data.featured, ...data.others]
 
-  // Ensure Magic Chess Cambodia is in featured list
-  const mcggIndex = featuredList.findIndex((g) => g.game_code === 'magic_chess_gogo')
-  if (mcggIndex === -1) {
-    const mcgg = othersList.find((g) => g.game_code === 'magic_chess_gogo')
-    if (mcgg) {
-      featuredList.push({
-        ...mcgg,
-        name: 'Magic Chess (Cambodia)',
-        description: 'Magic Chess Go Go — Official Cambodia Server & Global Top-Up',
-      })
-      othersList = othersList.filter((g) => g.game_code !== 'magic_chess_gogo')
-    }
-  } else {
-    featuredList[mcggIndex] = {
-      ...featuredList[mcggIndex],
+  // Clean, official display names & descriptions for Cambodian top-up store
+  const NAME_MAP: Record<string, { name: string; desc?: string }> = {
+    freefire_kh: {
+      name: 'Free Fire KH/SG',
+      desc: 'Garena Free Fire — Official Cambodia & Singapore Server',
+    },
+    freefire_bonus: {
+      name: 'Free Fire Bonus',
+      desc: 'Garena Free Fire — Exclusive Bonus Diamond Event Top-Up',
+    },
+    magic_chess_gogo: {
       name: 'Magic Chess (Cambodia)',
+      desc: 'Magic Chess Go Go — Official Cambodia Server & Global Top-Up',
+    },
+  }
+
+  // Top Games KH: Exactly 6 games to perfectly fill the 6-column desktop grid
+  const TARGET_FEATURED = [
+    'mlbb',
+    'freefire_kh',
+    'freefire_bonus',
+    'pubgm',
+    'hok',
+    'magic_chess_gogo',
+  ]
+
+  const featuredList: GameCategory[] = []
+  for (const code of TARGET_FEATURED) {
+    const game = all.find((g) => g.game_code === code)
+    if (game) {
+      const override = NAME_MAP[code]
+      featuredList.push({
+        ...game,
+        name: override ? override.name : game.name,
+        description: override?.desc || game.description,
+      })
     }
   }
+
+  const featuredCodes = new Set(featuredList.map((g) => g.game_code))
+  const othersList = all
+    .filter((g) => !featuredCodes.has(g.game_code))
+    .map((g) => {
+      const override = NAME_MAP[g.game_code]
+      return {
+        ...g,
+        name: override ? override.name : g.name,
+        description: override?.desc || g.description,
+      }
+    })
 
   featured.value = featuredList
   others.value = othersList
@@ -376,7 +407,7 @@ onUnmounted(() => {
       >
         <!-- Slides container -->
         <div
-          class="relative w-full overflow-hidden bg-surface-100 dark:bg-surface-900 aspect-[2.1/1] sm:aspect-[2.5/1] md:aspect-[2.8/1] lg:aspect-[3.2/1] min-h-[160px] sm:min-h-[200px] lg:min-h-[260px] max-h-[190px] sm:max-h-[270px] md:max-h-[320px] lg:max-h-[360px] touch-pan-y"
+          class="relative w-full overflow-hidden bg-surface-100 dark:bg-surface-900 aspect-[1.9/1] sm:aspect-[2.2/1] md:aspect-[2.5/1] lg:aspect-[2.85/1] min-h-[180px] sm:min-h-[230px] lg:min-h-[300px] max-h-[230px] sm:max-h-[320px] md:max-h-[380px] lg:max-h-[430px] touch-pan-y"
           @touchstart="handleTouchStart"
           @touchmove="handleTouchMove"
           @touchend="handleTouchEnd"
@@ -406,30 +437,30 @@ onUnmounted(() => {
 
             <!-- Caption overlay -->
             <div
-              class="absolute inset-0 flex items-center justify-start px-5 sm:px-8 md:px-10 lg:px-12"
+              class="absolute inset-0 flex items-center justify-start px-5 sm:px-8 md:px-10 lg:px-14"
             >
               <div
                 class="max-w-md sm:max-w-lg lg:max-w-xl text-left pointer-events-auto"
               >
                 <!-- Title -->
                 <h2
-                  class="banner-title text-base sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-extrabold text-white leading-tight text-balance drop-shadow-lg"
+                  class="banner-title text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-white leading-tight text-balance drop-shadow-lg"
                 >
                   {{ slide.title }}
                 </h2>
 
                 <!-- Subtitle -->
                 <p
-                  class="banner-subtitle mt-1 sm:mt-1.5 text-xs sm:text-sm text-white/80 max-w-md text-balance leading-relaxed drop-shadow line-clamp-2 sm:line-clamp-none"
+                  class="banner-subtitle mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base text-white/80 max-w-md text-balance leading-relaxed drop-shadow line-clamp-2 sm:line-clamp-none"
                 >
                   {{ slide.subtitle }}
                 </p>
 
                 <!-- CTA Button -->
-                <div class="banner-cta mt-2 sm:mt-3 lg:mt-3.5">
+                <div class="banner-cta mt-3 sm:mt-4">
                   <button
                     @click="navigateToGame(slide.ctaGameCode)"
-                    class="inline-flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                    class="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
                   >
                     {{ slide.cta }}
                     <svg

@@ -27,7 +27,7 @@ function trackPricesAsync(gameCode: string, products: Bay2GameProduct[]): void {
 }
 
 // Featured top game codes — these are the top games in Cambodia
-const FEATURED_GAME_CODES = ['mlbb', 'freefire_sgmy', 'pubgm', 'hok', 'magic_chess_gogo'];
+const FEATURED_GAME_CODES = ['mlbb', 'freefire_kh', 'freefire_bonus', 'pubgm', 'hok', 'magic_chess_gogo'];
 
 export async function getCategories(
   _req: Request,
@@ -62,6 +62,20 @@ export async function getCambodiaGames(
           ...g,
           name: 'Magic Chess (Cambodia)',
           description: 'Magic Chess Go Go — Official Cambodia Server & Global Top-Up',
+        };
+      }
+      if (g.game_code === 'freefire_kh') {
+        return {
+          ...g,
+          name: 'Free Fire KH/SG',
+          description: 'Garena Free Fire — Official Cambodia & Singapore Server',
+        };
+      }
+      if (g.game_code === 'freefire_bonus') {
+        return {
+          ...g,
+          name: 'Free Fire Bonus',
+          description: 'Garena Free Fire — Exclusive Bonus Diamond Event Top-Up',
         };
       }
       return g;
