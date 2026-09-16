@@ -204,7 +204,7 @@ onMounted(() => {
   <!-- Theme crossfade overlay — sits above everything during transitions -->
   <div ref="overlayRef" class="theme-overlay" style="opacity: 0;"></div>
 
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-white dark:bg-surface-950 text-surface-900 dark:text-surface-100 transition-colors duration-200">
     <Navbar
       :is-dark="isDark"
       :transitioning="transitioning"

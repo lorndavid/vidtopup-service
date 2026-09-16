@@ -395,7 +395,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-[#0B0F17] text-white"
+    class="min-h-screen bg-white dark:bg-[#0B0F17] text-slate-900 dark:text-white transition-colors duration-200"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <!-- ═══ HERO BANNER CAROUSEL ═══ -->
