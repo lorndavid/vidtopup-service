@@ -23,14 +23,10 @@ defineProps<{
     </div>
 
     <!-- Game Name -->
-    <div class="p-2.5 sm:p-3 bg-[#131926]/90">
+    <div class="p-2 sm:p-2.5 bg-[#131926]/90">
       <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
         {{ game.name }}
       </p>
-      <div class="flex items-center gap-1.5 mt-1">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-[10px] font-medium text-slate-400">Instant Delivery</span>
-      </div>
     </div>
   </router-link>
 </template>

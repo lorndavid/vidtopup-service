@@ -7,7 +7,7 @@ export const en = {
   'nav.lightMode': 'Switch to light mode',
 
   // Home - Hero
-  'hero.badge': '🇰🇭 Cambodia Top-Up',
+  'hero.badge': 'Cambodia Top-Up',
   'hero.subtitle': 'Fast & secure game top-ups for Cambodian gamers. KHQR Payment — Instant Delivery.',
   'hero.topGames': 'Top Games',
   'hero.instant': 'Instant',
@@ -20,7 +20,7 @@ export const en = {
   'home.securePayment': 'Secure KHQR Pay',
   'home.instantDelivery': 'Instant Delivery',
   'home.bestPrices': 'Best Prices',
-  'home.poweredBy': '🇰🇭 Powered for Cambodian Gamers — KHQR Payment via Bakong',
+  'home.poweredBy': 'Powered for Cambodian Gamers — KHQR Payment via Bakong',
   'home.tryAgain': 'Try Again',
 
   // Game Detail
@@ -85,10 +85,10 @@ export const en = {
   'payment.toast.paymentFailed': 'Payment failed. Please try again.',
   'payment.toast.timeExpired': 'Payment time expired. Please try again.',
   'payment.toast.createFailed': 'Failed to create payment',
-  'payment.lowBalanceTitle': '⚠️ Shop Stock is Low',
+  'payment.lowBalanceTitle': 'Shop Stock is Low',
   'payment.lowBalanceMessage': 'The shop is currently low on stock. If you pay now, your order will be queued and delivered automatically once stock is restocked. You will not lose your payment.',
   'payment.urgentWarning': 'Time is running out — scan now!',
-  'payment.successTitle': 'Payment Successful! 🎉',
+  'payment.successTitle': 'Payment Successful!',
   'payment.successMessage': 'Your payment has been received. Processing your top-up...',
   'payment.redirectingIn': 'Redirecting in',
   'payment.toast.cancelSuccess': 'Order cancelled successfully',

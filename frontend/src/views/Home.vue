@@ -613,7 +613,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-2.5 sm:gap-3">
               <div class="w-1.5 h-5 sm:h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
               <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                Top Games 🇰🇭
+                Top Games
                 <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
                   Fast Delivery
                 </span>
@@ -652,14 +652,10 @@ onUnmounted(() => {
                   <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"></div>
                 </div>
 
-                <div class="p-2 sm:p-3 bg-[#131926]/90">
-                  <h3 class="text-[11px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
+                <div class="p-2 sm:p-2.5 bg-[#131926]/90">
+                  <h3 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
                     {{ game.name }}
                   </h3>
-                  <div class="flex items-center gap-1 mt-1 sm:mt-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
-                    <span class="text-[9px] sm:text-[10px] font-medium text-slate-400 truncate">Instant Delivery</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -787,16 +783,12 @@ onUnmounted(() => {
                     class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"
                   ></div>
                 </div>
-                <div class="p-1.5 sm:p-3 bg-[#131926]/90">
+                <div class="p-1.5 sm:p-2.5 bg-[#131926]/90">
                   <p
-                    class="text-[10px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
+                    class="text-[11px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
                   >
                     {{ game.name }}
                   </p>
-                  <div class="flex items-center gap-1 mt-1 sm:mt-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
-                    <span class="text-[9px] sm:text-[10px] font-medium text-slate-400 truncate">Instant Delivery</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -900,9 +892,12 @@ onUnmounted(() => {
             </div>
 
             <p
-              class="mt-5 text-[10px] text-surface-400 dark:text-surface-500 font-medium tracking-wider"
+              class="mt-5 text-[10px] text-surface-400 dark:text-surface-500 font-medium tracking-wider flex items-center justify-center gap-1.5"
             >
-              🇰🇭 Powered for Cambodian Gamers — KHQR Payment via Bakong
+              <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Powered for Cambodian Gamers — KHQR Payment via Bakong</span>
             </p>
           </div>
         </div>

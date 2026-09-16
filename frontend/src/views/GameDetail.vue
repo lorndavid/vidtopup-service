@@ -1085,10 +1085,16 @@ onUnmounted(() => {
               <!-- Value highlights -->
               <div class="flex items-center gap-2 flex-wrap">
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#151C28]/90 border border-[#232D42] text-slate-300 text-xs font-medium">
-                  <span class="text-[#FF385C]">⚡</span> Instant Auto-Recharge
+                  <svg class="w-3.5 h-3.5 text-[#FF385C] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span>Instant Auto-Recharge</span>
                 </div>
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#151C28]/90 border border-[#232D42] text-slate-300 text-xs font-medium">
-                  <span class="text-emerald-400">🛡️</span> Direct Game API
+                  <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>Direct Game API</span>
                 </div>
               </div>
             </div>
@@ -1131,7 +1137,10 @@ onUnmounted(() => {
               <div :class="['overflow-hidden transition-all duration-300 ease-in-out', showServerIdHelp ? 'max-h-60 opacity-100 mb-4' : 'max-h-0 opacity-0 pointer-events-none']">
                 <div class="p-3.5 rounded-2xl bg-[#0B0F17]/80 border border-[#232D42] text-xs text-slate-300 space-y-2">
                   <p class="font-bold text-white flex items-center gap-1.5">
-                    <span>📌</span> Finding your ID in {{ gameDisplayName }}:
+                    <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Finding your ID in {{ gameDisplayName }}:</span>
                   </p>
                   <ol class="list-decimal pl-5 space-y-1 text-slate-400">
                     <li>Launch {{ gameDisplayName }} on your device.</li>
@@ -1242,7 +1251,7 @@ onUnmounted(() => {
                 <!-- Sort / Filter Pills -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
                   <button
-                    v-for="opt in ([{ mode: 'default' as SortMode, label: 'All' }, { mode: 'most-popular' as SortMode, label: '🔥 Popular' }, { mode: 'best-value' as SortMode, label: '💎 Best Value' }, { mode: 'cheapest' as SortMode, label: '💰 Lowest Price' }])"
+                    v-for="opt in ([{ mode: 'default' as SortMode, label: 'All' }, { mode: 'most-popular' as SortMode, label: 'Popular' }, { mode: 'best-value' as SortMode, label: 'Best Value' }, { mode: 'cheapest' as SortMode, label: 'Lowest Price' }])"
                     :key="opt.mode"
                     @click="activeSort = opt.mode"
                     :class="[
@@ -1419,11 +1428,17 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Promo Error / Success Notice -->
-                <p v-if="promoError" class="text-[11px] text-red-400 font-medium pl-1">
-                  ⚠️ {{ promoError }}
+                <p v-if="promoError" class="text-[11px] text-red-400 font-medium pl-1 flex items-center gap-1">
+                  <svg class="w-3 h-3 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{{ promoError }}</span>
                 </p>
-                <p v-else-if="promoSuccess && appliedPromo" class="text-[11px] text-emerald-400 font-medium pl-1">
-                  ✓ {{ promoSuccess }}
+                <p v-else-if="promoSuccess && appliedPromo" class="text-[11px] text-emerald-400 font-medium pl-1 flex items-center gap-1">
+                  <svg class="w-3 h-3 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{{ promoSuccess }}</span>
                 </p>
               </div>
 
@@ -1494,8 +1509,11 @@ onUnmounted(() => {
                 {{ !verified ? '1. Verify Player ID' : '2. Select a Package' }}
               </button>
 
-              <p class="text-center text-[10px] text-slate-500">
-                🔒 Safe & encrypted. By clicking Pay Now you accept VidTopUp terms.
+              <p class="text-center text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>Safe & encrypted. By clicking Pay Now you accept VidTopUp terms.</span>
               </p>
             </div>
           </div>
@@ -1872,7 +1890,7 @@ onUnmounted(() => {
                   </h3>
                   <p class="text-sm text-surface-500 dark:text-surface-400 mt-1">
                     This "Less is More" package is only available for accounts with
-                    <strong class="text-amber-600 dark:text-amber-400">49 💎 or fewer</strong> remaining diamonds.
+                    <strong class="text-amber-600 dark:text-amber-400">49 diamonds or fewer</strong> remaining diamonds.
                   </p>
                 </div>
               </div>
@@ -1905,7 +1923,7 @@ onUnmounted(() => {
                   class="mt-0.5 w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-primary-500 focus:ring-primary-400 cursor-pointer"
                 />
                 <span class="text-sm text-surface-700 dark:text-surface-300 group-hover:text-surface-900 dark:group-hover:text-surface-100 transition-colors">
-                  I have confirmed with the customer that their account has <strong>49 💎 or fewer</strong> remaining diamonds.
+                  I have confirmed with the customer that their account has <strong>49 diamonds or fewer</strong> remaining diamonds.
                 </span>
               </label>
 

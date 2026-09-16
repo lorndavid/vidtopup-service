@@ -57,7 +57,7 @@ export function getPackageVisual(
       const is2x = lowerName.includes('2x') || lowerName.includes('2 x') || lowerName.includes('double')
       return {
         displayTitle: is2x ? '2x Weekly Diamond Pass' : 'Weekly Diamond Pass',
-        subLabel: 'Daily Claim (Up to 490 💎)',
+        subLabel: 'Daily Claim (Up to 490 Diamonds)',
         displayCurrency: 'Pass',
         imageUrl: '/images/packages/mlbb-weekly-pass.svg',
         isPass: true,
