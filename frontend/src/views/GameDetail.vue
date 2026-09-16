@@ -1470,18 +1470,20 @@ onUnmounted(() => {
                   </span>
                 </div>
 
-                <div class="p-3.5 rounded-2xl bg-[#0B0F17] border border-[#FF385C]/40 ring-1 ring-[#FF385C]/20 flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 p-1 flex items-center justify-center shrink-0">
-                      <img src="/khqr.png" alt="KHQR" class="w-full h-full object-contain" />
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-[#222429] border border-white/[0.08] hover:border-white/20 transition-all flex items-center justify-between shadow-sm">
+                  <div class="flex items-center gap-3 sm:gap-3.5">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#E1251B] flex items-center justify-center p-2 shrink-0 shadow-md">
+                      <img src="/khqr.png" alt="KHQR" class="w-7 sm:w-8 h-auto object-contain" />
                     </div>
                     <div>
-                      <p class="text-sm font-bold text-white">Bakong KHQR</p>
-                      <p class="text-[11px] text-slate-400">Scan with ABA, Wing, ACLEDA & all banks</p>
+                      <p class="text-sm sm:text-base font-bold text-white tracking-wide leading-tight">ABA KHQR</p>
+                      <p class="text-xs text-slate-400 font-normal mt-0.5">Scan to pay with any banking app</p>
                     </div>
                   </div>
-                  <div class="w-5 h-5 rounded-full border-2 border-[#FF385C] flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#FF385C]"></div>
+                  <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <svg class="w-3.5 h-3.5 text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
                 </div>
               </div>
