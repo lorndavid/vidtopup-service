@@ -10,6 +10,9 @@ export interface IOrder extends Document {
   game_user_id: string;
   game_zone_id?: string;
   amount: number;
+  original_amount?: number;
+  discount_amount?: number;
+  promo_code?: string;
   player_id: string;
   server_id?: string;
   payment_method: 'cutluy';
@@ -41,6 +44,9 @@ const OrderSchema = new Schema<IOrder>(
     game_user_id: { type: String, required: true },
     game_zone_id: { type: String },
     amount: { type: Number, required: true },
+    original_amount: { type: Number },
+    discount_amount: { type: Number, default: 0 },
+    promo_code: { type: String, uppercase: true, trim: true },
     player_id: { type: String, required: true },
     server_id: { type: String },
     payment_method: {

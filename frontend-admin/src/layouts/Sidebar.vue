@@ -61,6 +61,11 @@ const navItems: NavItem[] = [
       route: '/announcements',
     },
     {
+      label: 'Promo Codes',
+      icon: 'profit',
+      route: '/promos',
+    },
+    {
     label: 'Operations',
     icon: 'operations',
     children: [

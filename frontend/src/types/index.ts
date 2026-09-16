@@ -34,6 +34,17 @@ export interface PaymentRequest {
   player_id: string
   server_id?: string
   amount: number
+  promo_code?: string
+}
+
+export interface PromoValidationResult {
+  code: string
+  discount_type: 'fixed' | 'percentage'
+  discount_value: number
+  discount_amount: number
+  final_amount: number
+  original_amount: number
+  message: string
 }
 
 export interface PaymentResponse {

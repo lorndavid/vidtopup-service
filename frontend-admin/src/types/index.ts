@@ -245,6 +245,39 @@ export interface PageAnalyticsData {
   }
 }
 
+// ─── Promo Codes CMS ────────────────────────────────────
+export type DiscountType = 'fixed' | 'percentage'
+
+export interface AdminPromoCode {
+  _id: string
+  code: string
+  discount_type: DiscountType
+  discount_value: number
+  max_discount_amount?: number
+  min_spend?: number
+  start_date?: string
+  end_date?: string
+  usage_limit?: number
+  used_count: number
+  is_active: boolean
+  applicable_games?: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface CreatePromoPayload {
+  code: string
+  discount_type: DiscountType
+  discount_value: number
+  max_discount_amount?: number
+  min_spend?: number
+  start_date?: string
+  end_date?: string
+  usage_limit?: number
+  applicable_games?: string[]
+  is_active?: boolean
+}
+
 // ─── API Generic ───────────────────────────────────────
 export interface ApiResponse<T = unknown> {
   success: boolean

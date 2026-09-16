@@ -14,6 +14,8 @@ import type {
   LoginResponse,
   UpdateOrderStatusPayload,
   SaveProfitMarginPayload,
+  AdminPromoCode,
+  CreatePromoPayload,
 } from '@/types'
 
 function getBaseUrl(): string {
@@ -262,6 +264,33 @@ class AdminApiService {
 
   async toggleAnnouncement(id: string): Promise<ApiResponse> {
     const { data } = await this.api.patch<ApiResponse>(`/admin/announcements/${id}/toggle`)
+    return data
+  }
+
+  // ─── Promo Codes CMS ───────────────────────────────
+  async getPromos(): Promise<ApiResponse<AdminPromoCode[]>> {
+    const { data } = await this.api.get<ApiResponse<AdminPromoCode[]>>('/admin/promos')
+    if (!data.success) throw new Error(data.message || 'Failed to fetch promo codes')
+    return data
+  }
+
+  async createPromo(payload: CreatePromoPayload): Promise<ApiResponse<AdminPromoCode>> {
+    const { data } = await this.api.post<ApiResponse<AdminPromoCode>>('/admin/promos', payload)
+    return data
+  }
+
+  async updatePromo(id: string, payload: Partial<CreatePromoPayload>): Promise<ApiResponse<AdminPromoCode>> {
+    const { data } = await this.api.put<ApiResponse<AdminPromoCode>>(`/admin/promos/${id}`, payload)
+    return data
+  }
+
+  async deletePromo(id: string): Promise<ApiResponse> {
+    const { data } = await this.api.delete<ApiResponse>(`/admin/promos/${id}`)
+    return data
+  }
+
+  async togglePromo(id: string): Promise<ApiResponse<AdminPromoCode>> {
+    const { data } = await this.api.patch<ApiResponse<AdminPromoCode>>(`/admin/promos/${id}/toggle`)
     return data
   }
 }

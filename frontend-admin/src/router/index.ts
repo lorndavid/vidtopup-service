@@ -83,6 +83,12 @@ const router = createRouter({
       meta: { layout: 'dashboard', title: 'Announcements' },
     },
     {
+      path: '/promos',
+      name: 'promos',
+      component: () => import('@/views/PromoCodes.vue'),
+      meta: { layout: 'dashboard', title: 'Promo Codes & Discounts' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },

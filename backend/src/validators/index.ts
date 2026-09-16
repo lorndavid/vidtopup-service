@@ -8,6 +8,7 @@ export const paymentCreateSchema = z.object({
   player_id: z.string().min(1, 'Player ID is required'),
   server_id: z.string().optional(),
   amount: z.number().positive('Amount must be positive'),
+  promo_code: z.string().optional(),
 });
 
 export const orderCreateSchema = z.object({

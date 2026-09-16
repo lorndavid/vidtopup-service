@@ -19,7 +19,7 @@ export async function createPayment(
       );
     }
 
-    const { game_code, product_code, product_name, game_name, player_id, server_id, amount } = validation.data;
+    const { game_code, product_code, product_name, game_name, player_id, server_id, amount, promo_code } = validation.data;
     const result = await orderService.createPaymentRequest({
       gameCode: game_code,
       productCode: product_code,
@@ -28,6 +28,7 @@ export async function createPayment(
       playerId: player_id,
       serverId: server_id,
       amount,
+      promoCode: promo_code,
     });
 
     res.status(HTTP_STATUS.CREATED).json({

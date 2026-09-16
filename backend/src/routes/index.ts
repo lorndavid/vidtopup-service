@@ -39,6 +39,14 @@ import { getActiveAnnouncements,
   deleteAnnouncement,
   toggleAnnouncement,
 } from '../controllers/announcement.controller';
+import {
+  validatePromoCode,
+  getAdminPromos,
+  createAdminPromo,
+  updateAdminPromo,
+  deleteAdminPromo,
+  toggleAdminPromo,
+} from '../controllers/promo.controller';
 import { config } from '../config';
 import { pushNotificationService } from '../services/pushNotification.service';
 import {
@@ -54,6 +62,9 @@ const router = Router();
 router.get('/categories', getCategories);
 router.get('/cambodia-games', getCambodiaGames);
 router.get('/products/:gameCode', getProductsByGame);
+
+// Promo codes (public validation)
+router.post('/promos/validate', validatePromoCode);
 
 // Player Verification
 router.post('/verify-player', playerVerifyLimiter, verifyPlayer);
@@ -180,5 +191,12 @@ router.post('/admin/announcements', verifyToken, createAnnouncement);
 router.put('/admin/announcements/:id', verifyToken, updateAnnouncement);
 router.delete('/admin/announcements/:id', verifyToken, deleteAnnouncement);
 router.patch('/admin/announcements/:id/toggle', verifyToken, toggleAnnouncement);
+
+// Admin: Promo Codes CMS
+router.get('/admin/promos', verifyToken, getAdminPromos);
+router.post('/admin/promos', verifyToken, createAdminPromo);
+router.put('/admin/promos/:id', verifyToken, updateAdminPromo);
+router.delete('/admin/promos/:id', verifyToken, deleteAdminPromo);
+router.patch('/admin/promos/:id/toggle', verifyToken, toggleAdminPromo);
 
 export default router;

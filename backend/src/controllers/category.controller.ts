@@ -27,7 +27,7 @@ function trackPricesAsync(gameCode: string, products: Bay2GameProduct[]): void {
 }
 
 // Featured top game codes — these are the top games in Cambodia
-const FEATURED_GAME_CODES = ['mlbb', 'freefire_sgmy', 'pubgm', 'hok'];
+const FEATURED_GAME_CODES = ['mlbb', 'freefire_sgmy', 'pubgm', 'hok', 'magic_chess_gogo'];
 
 export async function getCategories(
   _req: Request,
@@ -53,7 +53,19 @@ export async function getCambodiaGames(
   next: NextFunction
 ): Promise<void> {
   try {
-    const categories = await bay2gameService.getCategories();
+    const rawCategories = await bay2gameService.getCategories();
+
+    // Map categories and format display names for clarity
+    const categories = rawCategories.map((g) => {
+      if (g.game_code === 'magic_chess_gogo') {
+        return {
+          ...g,
+          name: 'Magic Chess (Cambodia)',
+          description: 'Magic Chess Go Go — Official Cambodia Server & Global Top-Up',
+        };
+      }
+      return g;
+    });
 
     // Sort featured games to the top, maintain order
     const featured = FEATURED_GAME_CODES.map(

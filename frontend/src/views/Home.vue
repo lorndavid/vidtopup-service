@@ -178,129 +178,28 @@ watch(activeBanner, () => {
   nextTick(() => animateBannerCaption())
 })
 
-// ─── Featured scroll ───
-const featuredScrollRef = ref<HTMLElement | null>(null)
-const mobileFeaturedScrollRef = ref<HTMLElement | null>(null)
-const canScrollLeft = ref(false)
-const canScrollRight = ref(true)
-const activeDotIndex = ref(0)
-
-function updateScrollButtons() {
-  const el = featuredScrollRef.value
-  if (!el) return
-  canScrollLeft.value = el.scrollLeft > 4
-  canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 4
-}
-
-function updateActiveDot() {
-  const el = mobileFeaturedScrollRef.value
-  if (!el) return
-  const card = el.querySelector('.featured-card')
-  if (!card) return
-  const cardWidth = card.getBoundingClientRect().width
-  const gap = 10
-  const step = cardWidth + gap
-  if (step <= 0) return
-  const idx = Math.round(el.scrollLeft / step)
-  activeDotIndex.value = Math.min(idx, featured.value.length - 1)
-}
-
-function scrollFeatured(direction: 'left' | 'right') {
-  const el = featuredScrollRef.value
-  if (!el) return
-  const cardWidth = el.querySelector('.featured-card')?.getBoundingClientRect().width || 260
-  const gap = 16
-  const scrollAmount = cardWidth + gap
-  el.scrollBy({
-    left: direction === 'left' ? -scrollAmount : scrollAmount,
-    behavior: 'smooth',
-  })
-}
-
-function scrollFeaturedToIndex(index: number) {
-  const el = mobileFeaturedScrollRef.value
-  if (!el) return
-  const card = el.querySelector('.featured-card')
-  if (!card) return
-  const cardWidth = card.getBoundingClientRect().width
-  const gap = 10
-  el.scrollTo({
-    left: index * (cardWidth + gap),
-    behavior: 'smooth',
-  })
-}
-
-function handleFeaturedScroll() {
-  updateScrollButtons()
-  updateActiveDot()
-}
-
-// ─── Featured cards staggered entrance ───
+// ─── Featured cards entrance animation ───
 function animateFeaturedCards() {
   if (!featuredRef.value) return
-  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-
-  const header = featuredRef.value.querySelector('.featured-header')
-  if (header) {
-    tl.fromTo(
-      header,
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }
-    )
-  }
-
-  function animateCardSet(container: HTMLElement | null) {
-    if (!container) return
-    const cards = container.querySelectorAll('.featured-card')
-    const count = cards.length
-    if (count === 0) return
-    tl.fromTo(
+  const cards = featuredRef.value.querySelectorAll('.featured-card-item')
+  if (cards.length > 0) {
+    gsap.fromTo(
       cards,
-      {
-        opacity: 0,
-        y: (i: number) => (i % 2 === 0 ? -18 : 18),
-        x: (i: number) => {
-          const mid = (count - 1) / 2
-          return (i - mid) * 25
-        },
-        rotate: (i: number) => (i % 2 === 0 ? -2 : 2),
-        scale: 0.92,
-      },
+      { opacity: 0, y: 16, scale: 0.96 },
       {
         opacity: 1,
         y: 0,
-        x: 0,
-        rotate: 0,
         scale: 1,
-        duration: 0.55,
-        stagger: { from: 'center', amount: 0.3 },
-        ease: 'back.out(1.6)',
-      },
-      '-=0.15'
+        duration: 0.45,
+        stagger: 0.05,
+        ease: 'power2.out',
+      }
     )
   }
-
-  animateCardSet(featuredScrollRef.value)
-  animateCardSet(mobileFeaturedScrollRef.value)
 }
 
-// Update scroll buttons + attach listeners when featured data loads
 watch(featured, () => {
-  nextTick(() => {
-    animateFeaturedCards()
-    updateScrollButtons()
-    updateActiveDot()
-    const desktopEl = featuredScrollRef.value
-    if (desktopEl && !desktopEl.dataset.listenerAttached) {
-      desktopEl.addEventListener('scroll', updateScrollButtons, { passive: true })
-      desktopEl.dataset.listenerAttached = 'true'
-    }
-    const mobileEl = mobileFeaturedScrollRef.value
-    if (mobileEl && !mobileEl.dataset.listenerAttached) {
-      mobileEl.addEventListener('scroll', handleFeaturedScroll, { passive: true })
-      mobileEl.dataset.listenerAttached = 'true'
-    }
-  })
+  nextTick(() => animateFeaturedCards())
 })
 
 // ─── Search ───
@@ -324,15 +223,41 @@ function navigateToGame(gameCode: string) {
   router.push(`/game/${gameCode}`)
 }
 
+function processGameCategories(data: CambodiaGamesResponse) {
+  let featuredList = [...data.featured]
+  let othersList = [...data.others]
+
+  // Ensure Magic Chess Cambodia is in featured list
+  const mcggIndex = featuredList.findIndex((g) => g.game_code === 'magic_chess_gogo')
+  if (mcggIndex === -1) {
+    const mcgg = othersList.find((g) => g.game_code === 'magic_chess_gogo')
+    if (mcgg) {
+      featuredList.push({
+        ...mcgg,
+        name: 'Magic Chess (Cambodia)',
+        description: 'Magic Chess Go Go — Official Cambodia Server & Global Top-Up',
+      })
+      othersList = othersList.filter((g) => g.game_code !== 'magic_chess_gogo')
+    }
+  } else {
+    featuredList[mcggIndex] = {
+      ...featuredList[mcggIndex],
+      name: 'Magic Chess (Cambodia)',
+    }
+  }
+
+  featured.value = featuredList
+  others.value = othersList
+  gameStore.categories = [...featuredList, ...othersList]
+}
+
 // ─── Data fetching (with Instant 0ms SWR Client Cache) ───
 async function fetchData(forceRefresh: boolean | unknown = false) {
   const isForced = typeof forceRefresh === 'boolean' ? forceRefresh : false
   // 1. Check client cache first for 0ms instant display
   const cached = clientCache.get<CambodiaGamesResponse>('cambodia_games')
   if (cached && !isForced) {
-    featured.value = cached.data.featured
-    others.value = cached.data.others
-    gameStore.categories = [...cached.data.featured, ...cached.data.others]
+    processGameCategories(cached.data)
     loading.value = false
 
     // Pre-warm top games products in background during idle time
@@ -354,9 +279,7 @@ async function fetchData(forceRefresh: boolean | unknown = false) {
       await new Promise((resolve) => setTimeout(resolve, 500))
       data = await getCambodiaGames()
     }
-    featured.value = data.featured
-    others.value = data.others
-    gameStore.categories = [...data.featured, ...data.others]
+    processGameCategories(data)
     clientCache.set('cambodia_games', data, 15 * 60 * 1000) // 15 mins TTL
     warmTopGamesCache()
   } catch (err) {
@@ -655,215 +578,62 @@ onUnmounted(() => {
         v-else
         class="max-w-6xl mx-auto space-y-10 sm:space-y-12 lg:space-y-16"
       >
-        <!-- ─── FEATURED GAMES ─── -->
+        <!-- ─── FEATURED GAMES (Top Games 🇰🇭) ─── -->
         <div v-if="featured.length > 0" ref="featuredRef">
-          <div class="featured-header flex items-center gap-3 mb-5 sm:mb-6">
-            <div
-              class="w-1 h-5 sm:h-6 rounded-full bg-gradient-to-b from-amber-400 to-orange-500"
-            ></div>
-            <h2
-              class="text-base sm:text-lg font-bold text-surface-900 dark:text-white uppercase tracking-wider"
-            >
-              Top Games 🇰🇭
-            </h2>
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
+              <div>
+                <h2 class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                  Top Games 🇰🇭
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
+                    Fast Delivery
+                  </span>
+                </h2>
+                <p class="text-xs text-slate-400">Official Cambodian server support &amp; instant KHQR Bakong top-up</p>
+              </div>
+            </div>
           </div>
 
-          <!-- Mobile: horizontal scroll row -->
-          <div
-            ref="mobileFeaturedScrollRef"
-            class="md:hidden flex overflow-x-auto gap-2.5 pb-2 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar"
-          >
+          <!-- Clean Responsive Grid (Identical layout to All Games) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
             <div
               v-for="game in featured"
               :key="game.game_code"
-              class="featured-card shrink-0 w-[42vw] sm:w-[36vw] snap-start"
+              class="featured-card-item"
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.15)] hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/70 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.22)] hover:-translate-y-1 block select-none"
               >
-                <div class="relative aspect-[4/3] overflow-hidden">
+                <!-- Badge for Top Games -->
+                <div class="absolute top-2 left-2 z-10">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-[#FF385C] to-[#FF5E3A] text-white shadow-md">
+                    Top Pick
+                  </span>
+                </div>
+
+                <div class="aspect-[4/3] overflow-hidden bg-[#0B0F17] relative">
                   <img
                     :src="game.image_url"
                     :alt="game.name"
-                    class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
-                  <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"
-                  ></div>
-                  <div class="absolute bottom-0 left-0 right-0 p-1.5 sm:p-2.5">
-                    <h3
-                      class="text-[10px] sm:text-xs font-bold text-white group-hover:text-amber-300 transition-colors duration-300 drop-shadow-lg leading-tight"
-                    >
-                      {{ game.name }}
-                    </h3>
-                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"></div>
                 </div>
-                <div class="p-1.5 sm:p-2 flex items-center justify-between">
-                  <div class="flex items-center gap-1.5">
-                    <div
-                      class="w-4 h-4 sm:w-5 sm:h-5 rounded-lg overflow-hidden ring-1 ring-surface-200 dark:ring-surface-700 shrink-0"
-                    >
-                      <img
-                        :src="game.image_url"
-                        :alt="game.name"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="flex items-center gap-0.5 text-surface-400 dark:text-surface-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-all duration-300"
-                  >
-                    <svg
-                      class="w-3 h-3 sm:w-3.5 sm:h-3.5 group-hover:translate-x-0.5 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 8l4 4m0 0l-4 4m4-4H3"
-                      />
-                    </svg>
+
+                <div class="p-2.5 sm:p-3 bg-[#131926]/90">
+                  <h3 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
+                    {{ game.name }}
+                  </h3>
+                  <div class="flex items-center gap-1.5 mt-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[10px] font-medium text-slate-400">Instant Delivery</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Mobile: pagination dot indicators -->
-          <div
-            v-if="featured.length > 1"
-            class="md:hidden flex items-center justify-center gap-1.5 mt-1.5"
-          >
-            <button
-              v-for="(_, idx) in featured"
-              :key="idx"
-              @click="scrollFeaturedToIndex(idx)"
-              :class="[
-                'rounded-full transition-all duration-300',
-                idx === activeDotIndex
-                  ? 'w-5 h-1.5 bg-primary-500 dark:bg-primary-400'
-                  : 'w-1.5 h-1.5 bg-surface-300 dark:bg-surface-600 hover:bg-surface-400 dark:hover:bg-surface-500',
-              ]"
-              :aria-label="'Go to card ' + (idx + 1)"
-            ></button>
-          </div>
-
-          <!-- Tablet+ : horizontal scroll row with arrow navigation -->
-          <div class="hidden md:block relative">
-            <button
-              v-show="canScrollLeft"
-              @click="scrollFeatured('left')"
-              class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-10 h-10 rounded-full bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 shadow-lg flex items-center justify-center text-surface-500 hover:text-primary-500 hover:border-primary-300 dark:hover:text-primary-400 dark:hover:border-primary-600 transition-all duration-200 hover:scale-105 active:scale-95"
-              aria-label="Scroll left"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-
-            <div
-              ref="featuredScrollRef"
-              class="flex flex-row gap-4 overflow-x-auto pb-2 hide-scrollbar"
-            >
-              <div
-                v-for="game in featured"
-                :key="game.game_code"
-                class="featured-card shrink-0 w-[calc(25%_-_12px)]"
-              >
-                <div
-                  @click="navigateToGame(game.game_code)"
-                  class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.18)] hover:-translate-y-0.5"
-                >
-                  <div class="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      :src="game.image_url"
-                      :alt="game.name"
-                      class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div
-                      class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"
-                    ></div>
-                    <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
-                      <h3
-                        class="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition-colors duration-300 drop-shadow-lg"
-                      >
-                        {{ game.name }}
-                      </h3>
-                    </div>
-                  </div>
-                  <div class="p-2 sm:p-3 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg overflow-hidden ring-1 ring-surface-200 dark:ring-surface-700 shrink-0"
-                      >
-                        <img
-                          :src="game.image_url"
-                          :alt="game.name"
-                          class="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="flex items-center gap-1 text-surface-400 dark:text-surface-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-all duration-300"
-                    >
-                      <span class="text-[10px] font-medium hidden sm:inline"
-                        >Top Up</span
-                      >
-                      <svg
-                        class="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M17 8l4 4m0 0l-4 4m4-4H3"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              v-show="canScrollRight"
-              @click="scrollFeatured('right')"
-              class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-10 h-10 rounded-full bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 shadow-lg flex items-center justify-center text-surface-500 hover:text-primary-500 hover:border-primary-300 dark:hover:text-primary-400 dark:hover:border-primary-600 transition-all duration-200 hover:scale-105 active:scale-95"
-              aria-label="Scroll right"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -966,7 +736,7 @@ onUnmounted(() => {
 
           <div
             v-if="filteredOthers.length > 0"
-            class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
           >
             <div
               v-for="game in filteredOthers"
@@ -975,25 +745,29 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-200 hover:shadow-[0_6px_18px_rgba(255,56,92,0.14)] hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.16)] hover:-translate-y-1 block select-none"
               >
-                <div class="aspect-[4/3] overflow-hidden">
+                <div class="aspect-[4/3] overflow-hidden bg-[#0B0F17] relative">
                   <img
                     :src="game.image_url"
                     :alt="game.name"
-                    class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
                   <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+                    class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"
                   ></div>
                 </div>
-                <div class="p-1.5 sm:p-2">
+                <div class="p-2.5 sm:p-3 bg-[#131926]/90">
                   <p
-                    class="text-[11px] sm:text-xs font-semibold text-surface-800 dark:text-surface-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200"
+                    class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
                   >
                     {{ game.name }}
                   </p>
+                  <div class="flex items-center gap-1.5 mt-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[10px] font-medium text-slate-400">Instant Delivery</span>
+                  </div>
                 </div>
               </div>
             </div>

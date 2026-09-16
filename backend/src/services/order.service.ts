@@ -9,6 +9,7 @@ import { orderRepository } from '../repositories/OrderRepository';
 import { notificationService } from './notification.service';
 import { webSocketService } from './websocket.service';
 import { pushNotificationService } from './pushNotification.service';
+import { PromoCodeModel } from '../models/PromoCode';
 
 export class OrderService {
   /**
@@ -32,6 +33,7 @@ export class OrderService {
     playerId: string;
     serverId?: string;
     amount: number;
+    promoCode?: string;
   }) {
     // Check database connection before proceeding
     if (mongoose.connection.readyState !== 1) {
@@ -43,6 +45,43 @@ export class OrderService {
 
     const reference = generateReference();
 
+    // Validate and calculate promo code discount if provided
+    let finalAmount = params.amount;
+    let discountAmount = 0;
+    let appliedPromo: string | undefined = undefined;
+
+    if (params.promoCode && typeof params.promoCode === 'string') {
+      const cleanCode = params.promoCode.trim().toUpperCase();
+      const promo = await PromoCodeModel.findOne({ code: cleanCode });
+      if (promo && promo.is_active) {
+        const now = new Date();
+        const validDates =
+          (!promo.start_date || now >= new Date(promo.start_date)) &&
+          (!promo.end_date || now <= new Date(promo.end_date));
+        const validUsage = !promo.usage_limit || promo.used_count < promo.usage_limit;
+        const validMinSpend = !promo.min_spend || params.amount >= promo.min_spend;
+        const validGame =
+          !promo.applicable_games?.length || promo.applicable_games.includes(params.gameCode);
+
+        if (validDates && validUsage && validMinSpend && validGame) {
+          if (promo.discount_type === 'percentage') {
+            discountAmount = (params.amount * promo.discount_value) / 100;
+            if (promo.max_discount_amount && discountAmount > promo.max_discount_amount) {
+              discountAmount = promo.max_discount_amount;
+            }
+          } else {
+            discountAmount = promo.discount_value;
+          }
+          discountAmount = Math.round(discountAmount * 100) / 100;
+          if (discountAmount >= params.amount) {
+            discountAmount = Math.max(0, Math.round((params.amount - 0.01) * 100) / 100);
+          }
+          finalAmount = Math.max(0.01, Math.round((params.amount - discountAmount) * 100) / 100);
+          appliedPromo = promo.code;
+        }
+      }
+    }
+
     // 1. Create the order in our DB
     const order = await orderRepository.create({
       reference,
@@ -52,7 +91,10 @@ export class OrderService {
       game_name: params.gameName,
       game_user_id: params.playerId,
       game_zone_id: params.serverId,
-      amount: params.amount,
+      amount: finalAmount,
+      original_amount: params.amount,
+      discount_amount: discountAmount,
+      promo_code: appliedPromo,
       player_id: params.playerId,
       server_id: params.serverId,
       payment_method: 'cutluy',
@@ -65,7 +107,7 @@ export class OrderService {
     //      https://link.payway.com.kh/ABAPAY7a479793u
     //    This is an ABA PayWay link that accepts Bakong KHQR payments.
     const cutluyPayment = await cutluyService.createPayment({
-      amount: params.amount,
+      amount: finalAmount,
       reference_id: reference,
       metadata: {
         game_code: params.gameCode,
@@ -74,6 +116,8 @@ export class OrderService {
         game_name: params.gameName,
         player_id: params.playerId,
         server_id: params.serverId,
+        promo_code: appliedPromo || '',
+        discount_amount: discountAmount,
       },
     });
 
@@ -128,6 +172,9 @@ export class OrderService {
 
         if (cutluyService.isPaid(cutluyResult.status)) {
           const updated = await orderRepository.markPaid(reference);
+          if (order.promo_code) {
+            PromoCodeModel.updateOne({ code: order.promo_code }, { $inc: { used_count: 1 } }).catch(() => {});
+          }
 
           // Notify connected clients in real-time
           webSocketService.emitPaymentStatus({
@@ -537,6 +584,9 @@ export class OrderService {
     if (cutluyIsPaid && order.payment_status !== 'paid') {
       console.log(`✅ CutLuy webhook: payment completed for ${reference}`);
       await orderRepository.markPaid(reference);
+      if (order.promo_code) {
+        PromoCodeModel.updateOne({ code: order.promo_code }, { $inc: { used_count: 1 } }).catch(() => {});
+      }
 
       webSocketService.emitPaymentStatus({
         reference,

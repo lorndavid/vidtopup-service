@@ -6,8 +6,8 @@ import { useI18nStore } from '@/stores/i18n'
 import { useToastStore } from '@/stores/toast'
 import ProductCard from '@/components/ProductCard.vue'
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
-import { verifyPlayer, createPayment, getPaymentStatus, cancelOrder, getOrder, getNewProductsConfig, getPriceDropsByGame } from '@/services/api'
-import type { GameProduct } from '@/types'
+import { verifyPlayer, createPayment, getPaymentStatus, cancelOrder, getOrder, getNewProductsConfig, getPriceDropsByGame, validatePromoCode } from '@/services/api'
+import type { GameProduct, PromoValidationResult } from '@/types'
 import { useSavedPlayers } from '@/composables/useSavedPlayers'
 import { formatPrice } from '@/composables/useCurrency'
 import { getGameCurrency, extractAmount } from '@/utils/gameCurrency'
@@ -95,6 +95,77 @@ const selectedProduct = ref<GameProduct | null>(null)
 const selectedVisual = computed(() => {
   if (!selectedProduct.value) return null
   return getPackageVisual(gameCode.value, selectedProduct.value.name, selectedProduct.value.product_code)
+})
+
+// ─── Promo Code State ───
+const promoInput = ref('')
+const appliedPromo = ref<PromoValidationResult | null>(null)
+const promoLoading = ref(false)
+const promoError = ref<string | null>(null)
+const promoSuccess = ref<string | null>(null)
+
+const finalPrice = computed(() => {
+  if (!selectedProduct.value) return 0
+  if (!appliedPromo.value) return selectedProduct.value.sell_price
+  return appliedPromo.value.final_amount
+})
+
+const discountAmount = computed(() => {
+  if (!selectedProduct.value || !appliedPromo.value) return 0
+  return appliedPromo.value.discount_amount
+})
+
+async function applyPromo() {
+  const code = promoInput.value.trim()
+  if (!code) return
+  if (!selectedProduct.value) {
+    promoError.value = 'Please select a package first'
+    return
+  }
+
+  promoLoading.value = true
+  promoError.value = null
+  promoSuccess.value = null
+
+  try {
+    const result = await validatePromoCode(
+      code,
+      selectedProduct.value.sell_price,
+      gameCode.value
+    )
+    appliedPromo.value = result
+    promoSuccess.value = result.message
+    toast.success(result.message)
+  } catch (err: any) {
+    promoError.value = err.message || 'Invalid promo code'
+    appliedPromo.value = null
+  } finally {
+    promoLoading.value = false
+  }
+}
+
+function removePromo() {
+  appliedPromo.value = null
+  promoInput.value = ''
+  promoError.value = null
+  promoSuccess.value = null
+}
+
+// Re-validate applied promo when selected product changes
+watch(selectedProduct, async (newProd) => {
+  if (appliedPromo.value && newProd) {
+    try {
+      const result = await validatePromoCode(
+        appliedPromo.value.code,
+        newProd.sell_price,
+        gameCode.value
+      )
+      appliedPromo.value = result
+    } catch {
+      appliedPromo.value = null
+      promoError.value = 'Promo code not applicable to this package'
+    }
+  }
 })
 const playerId = ref('')
 const serverId = ref('')
@@ -687,7 +758,7 @@ async function executePayNow() {
     gameCode: gameCode.value,
     productName: selectedProduct.value.name,
     productCode: selectedProduct.value.product_code,
-    amount: selectedProduct.value.sell_price,
+    amount: finalPrice.value,
     playerId: playerId.value.trim(),
     serverId: serverId.value.trim() || undefined,
     verifyProvider: verifyProvider.value || undefined,
@@ -698,7 +769,7 @@ async function executePayNow() {
   analytics.trackPayment('initiated', {
     game_code: gameCode.value,
     product_code: selectedProduct.value.product_code,
-    amount: selectedProduct.value.sell_price,
+    amount: finalPrice.value,
   })
 
   mobileCheckoutActive.value = true
@@ -714,6 +785,7 @@ async function executePayNow() {
       player_id: playerId.value.trim(),
       server_id: serverId.value.trim() || undefined,
       amount: selectedProduct.value.sell_price,
+      promo_code: appliedPromo.value ? appliedPromo.value.code : undefined,
     })
 
     mobilePaymentRef.value = result.reference
@@ -1319,6 +1391,86 @@ onUnmounted(() => {
                 </div>
               </div>
 
+              <!-- ═══ Promo Code Section ═══ -->
+              <div class="pt-2 border-t border-[#1F293D] space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#FF385C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Promo Code
+                  </span>
+                  <span v-if="appliedPromo" class="text-[11px] text-emerald-400 font-bold">
+                    {{ appliedPromo.discount_type === 'percentage' ? `${appliedPromo.discount_value}% OFF` : `-$${appliedPromo.discount_amount.toFixed(2)}` }}
+                  </span>
+                </div>
+
+                <!-- Input or Active Tag -->
+                <div v-if="!appliedPromo" class="flex gap-2">
+                  <input
+                    v-model="promoInput"
+                    @keydown.enter.prevent="applyPromo"
+                    type="text"
+                    placeholder="Enter discount code..."
+                    class="flex-1 px-3 py-2 rounded-xl bg-[#0B0F17] border border-[#232D42] focus:border-[#FF385C] focus:ring-1 focus:ring-[#FF385C]/40 text-xs text-white uppercase font-mono tracking-wider outline-none placeholder-slate-600 transition-all"
+                  />
+                  <button
+                    type="button"
+                    @click="applyPromo"
+                    :disabled="promoLoading || !promoInput.trim()"
+                    class="px-3.5 py-2 rounded-xl bg-[#1F293D] hover:bg-[#FF385C] disabled:opacity-40 disabled:hover:bg-[#1F293D] text-white text-xs font-bold transition-all duration-200 cursor-pointer"
+                  >
+                    {{ promoLoading ? '...' : 'Apply' }}
+                  </button>
+                </div>
+
+                <!-- Applied Promo Pill -->
+                <div
+                  v-else
+                  class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-emerald-500/20 text-emerald-400">
+                      {{ appliedPromo.code }}
+                    </span>
+                    <span class="text-slate-300 font-medium">
+                      {{ appliedPromo.discount_type === 'percentage' ? `${appliedPromo.discount_value}% off` : `-$${appliedPromo.discount_amount.toFixed(2)} off` }}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    @click="removePromo"
+                    class="text-slate-400 hover:text-red-400 font-bold p-1 text-xs transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <!-- Promo Error / Success Notice -->
+                <p v-if="promoError" class="text-[11px] text-red-400 font-medium pl-1">
+                  ⚠️ {{ promoError }}
+                </p>
+                <p v-else-if="promoSuccess && appliedPromo" class="text-[11px] text-emerald-400 font-medium pl-1">
+                  ✓ {{ promoSuccess }}
+                </p>
+              </div>
+
+              <!-- Price Breakdown (if promo applied) -->
+              <div v-if="appliedPromo && selectedProduct" class="p-3 rounded-xl bg-[#0B0F17] border border-[#232D42] space-y-1.5 text-xs">
+                <div class="flex items-center justify-between text-slate-400">
+                  <span>Package Price:</span>
+                  <span class="font-mono text-slate-300">{{ formatPrice(selectedProduct.sell_price).formatted }}</span>
+                </div>
+                <div class="flex items-center justify-between text-emerald-400 font-semibold">
+                  <span>Promo Discount:</span>
+                  <span class="font-mono">-{{ formatPrice(discountAmount).formatted }}</span>
+                </div>
+                <div class="flex items-center justify-between text-white font-extrabold pt-1 border-t border-[#1F293D]">
+                  <span>Total Payable:</span>
+                  <span class="font-mono text-amber-400 text-sm">{{ formatPrice(finalPrice).formatted }}</span>
+                </div>
+              </div>
+
               <!-- Payment Method Section -->
               <div class="space-y-2 pt-2 border-t border-[#1F293D]">
                 <div class="flex items-center justify-between">
@@ -1360,7 +1512,7 @@ onUnmounted(() => {
                   <rect x="3" y="14" width="7" height="7" rx="1.5" />
                   <path d="M14 14h3v3h-3zM17 17h4v4h-4z" />
                 </svg>
-                <span>Pay Now • {{ formatPrice(selectedProduct?.sell_price || 0).formatted }}</span>
+                <span>Pay Now • {{ formatPrice(finalPrice).formatted }}</span>
               </button>
               <button
                 v-else
@@ -1442,8 +1594,11 @@ onUnmounted(() => {
                       {{ selectedVisual?.displayTitle }} {{ selectedVisual?.displayCurrency }}
                     </template>
                   </p>
-                  <p class="text-sm font-extrabold text-primary-600 dark:text-primary-400 leading-tight">
-                    {{ formatPrice(selectedProduct.sell_price).formatted }}
+                  <p class="text-sm font-extrabold text-primary-600 dark:text-primary-400 leading-tight flex items-center gap-1">
+                    {{ formatPrice(finalPrice).formatted }}
+                    <span v-if="appliedPromo" class="text-[10px] text-emerald-400 font-normal line-through">
+                      {{ formatPrice(selectedProduct.sell_price).formatted }}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -1562,9 +1717,9 @@ onUnmounted(() => {
               </div>
               <div class="flex items-baseline gap-1.5 mt-1.5">
                 <h2 class="text-2xl font-extrabold text-gray-900">
-                  {{ formatPrice(selectedProduct?.sell_price || 0).formatted }}
+                  {{ formatPrice(finalPrice).formatted }}
                 </h2>
-                <span class="text-xs font-medium text-slate-500 uppercase">{{ formatPrice(selectedProduct?.sell_price || 0).code }}</span>
+                <span class="text-xs font-medium text-slate-500 uppercase">{{ formatPrice(finalPrice).code }}</span>
               </div>
               <div v-if="playerNickname || playerId" class="text-[11px] text-slate-500 truncate mt-0.5">
                 Player: <span class="font-semibold text-slate-700">{{ playerNickname || playerId }}</span>

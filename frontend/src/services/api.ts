@@ -14,6 +14,7 @@ import type {
   BalanceInfo,
   NewProductsConfig,
   SiteAnnouncement,
+  PromoValidationResult,
 } from '@/types'
 
 function getBaseUrl(): string {
@@ -239,6 +240,22 @@ export async function getAnnouncements(): Promise<SiteAnnouncement[]> {
   const { data } = await api.get<ApiResponse<SiteAnnouncement[]>>('/announcements')
   if (!data.success) return []
   return data.data || []
+}
+
+export async function validatePromoCode(
+  code: string,
+  amount: number,
+  gameCode: string
+): Promise<PromoValidationResult> {
+  const { data } = await api.post<ApiResponse<PromoValidationResult>>('/promos/validate', {
+    code,
+    amount,
+    game_code: gameCode,
+  })
+  if (!data.success || !data.data) {
+    throw new Error(data.message || 'Invalid promo code')
+  }
+  return data.data
 }
 
 export default api
