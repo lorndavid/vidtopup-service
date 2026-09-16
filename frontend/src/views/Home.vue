@@ -441,13 +441,13 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-[#1A1919] text-white"
+    class="min-h-screen bg-[#0B0F17] text-white"
   >
     <div class="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-10">
       <!-- ═══ HERO BANNER CAROUSEL ═══ -->
       <div
         ref="bannerRef"
-        class="relative rounded-2xl overflow-hidden mb-8 sm:mb-12 lg:mb-14 bg-[#2A2A2A] border border-[#3A3A3A] shadow-2xl shadow-black/40 group"
+        class="relative rounded-2xl overflow-hidden mb-8 sm:mb-12 lg:mb-14 bg-[#131926]/90 border border-[#232D42] shadow-2xl shadow-black/40 group"
         @mouseenter="stopBannerAutoPlay"
         @mouseleave="startBannerAutoPlay"
       >
@@ -680,7 +680,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-300 hover:shadow-lg hover:shadow-[#C70C00]/10 hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.15)] hover:-translate-y-0.5"
               >
                 <div class="relative aspect-[4/3] overflow-hidden">
                   <img
@@ -787,7 +787,7 @@ onUnmounted(() => {
               >
                 <div
                   @click="navigateToGame(game.game_code)"
-                  class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-300 hover:shadow-lg hover:shadow-[#C70C00]/10 hover:-translate-y-0.5"
+                  class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.18)] hover:-translate-y-0.5"
                 >
                   <div class="relative aspect-[4/3] overflow-hidden">
                     <img
@@ -911,7 +911,7 @@ onUnmounted(() => {
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search games..."
-                class="w-full pl-10 pr-4 py-2 bg-[#2A2A2A] border border-[#3A3A3A] rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#C70C00]/30 focus:border-[#C70C00]/60 transition-all duration-200"
+                class="w-full pl-10 pr-4 py-2 bg-[#131926]/90 border border-[#232D42] rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#FF385C]/30 focus:border-[#FF385C]/60 transition-all duration-200"
               />
               <button
                 v-if="searchQuery"
@@ -975,7 +975,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-200 hover:shadow-[0_6px_18px_rgba(255,56,92,0.14)] hover:-translate-y-0.5"
               >
                 <div class="aspect-[4/3] overflow-hidden">
                   <img
@@ -1004,7 +1004,7 @@ onUnmounted(() => {
         <div ref="ctaRef">
           <div class="max-w-lg mx-auto text-center">
             <div
-              class="p-5 sm:p-8 rounded-2xl bg-[#2A2A2A] border border-[#3A3A3A] shadow-lg"
+              class="p-5 sm:p-8 rounded-2xl bg-[#131926]/90 border border-[#232D42] shadow-xl"
             >
               <div class="flex items-center justify-center gap-2 mb-5">
                 <svg
