@@ -612,15 +612,12 @@ onUnmounted(() => {
           <div class="flex items-center justify-between mb-3 sm:mb-6">
             <div class="flex items-center gap-2.5 sm:gap-3">
               <div class="w-1.5 h-5 sm:h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
-              <div>
-                <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                  Top Games 🇰🇭
-                  <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
-                    Fast Delivery
-                  </span>
-                </h2>
-                <p class="text-[11px] sm:text-xs text-slate-400">Official Cambodian server support &amp; instant KHQR Bakong top-up</p>
-              </div>
+              <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                Top Games 🇰🇭
+                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
+                  Fast Delivery
+                </span>
+              </h2>
             </div>
             <span class="sm:hidden text-[10px] font-medium text-slate-400 flex items-center gap-0.5 shrink-0">
               Scroll &rarr;
