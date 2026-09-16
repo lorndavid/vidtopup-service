@@ -1092,34 +1092,6 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-
-            <!-- Authentic Trust Bar -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#1F293D]/60 border-t border-[#1F293D]">
-              <div class="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#111724]/90 text-slate-300 text-[11px] sm:text-xs font-medium">
-                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Automated &lt; 60s Delivery</span>
-              </div>
-              <div class="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#111724]/90 text-slate-300 text-[11px] sm:text-xs font-medium">
-                <svg class="w-4 h-4 text-[#FF385C] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span>Player ID Verification</span>
-              </div>
-              <div class="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#111724]/90 text-slate-300 text-[11px] sm:text-xs font-medium">
-                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Zero Fee KHQR Scan</span>
-              </div>
-              <div class="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#111724]/90 text-slate-300 text-[11px] sm:text-xs font-medium">
-                <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span>24/7 Telegram Support</span>
-              </div>
-            </div>
           </div>
         </div>
 
