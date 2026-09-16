@@ -244,6 +244,29 @@ const productBadges = computed<Map<string, ProductBadge>>(() => {
   return map
 })
 
+const showServerIdHelp = ref(false)
+
+const bestSellingProducts = computed(() => {
+  const passesAndBadges = sortedProducts.value.filter((p) => {
+    const v = getPackageVisual(gameCode.value, p.name, p.product_code)
+    return (
+      v.isPass ||
+      productBadges.value.get(p.product_code) === 'most-popular' ||
+      productBadges.value.get(p.product_code) === 'best-value' ||
+      productsWithPriceDrop.value.has(p.product_code)
+    )
+  })
+  if (passesAndBadges.length >= 2) return passesAndBadges.slice(0, 4)
+  if (sortedProducts.value.length > 4) return sortedProducts.value.slice(0, 4)
+  return []
+})
+
+const generalProducts = computed(() => {
+  if (bestSellingProducts.value.length === 0) return sortedProducts.value
+  const bestCodes = new Set(bestSellingProducts.value.map((p) => p.product_code))
+  return sortedProducts.value.filter((p) => !bestCodes.has(p.product_code))
+})
+
 const staggerDone = ref(false)
 
 watch(
@@ -902,457 +925,513 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="game-detail-root">
-    <div ref="pageRef" class="min-h-screen relative overflow-hidden">
-    <!-- Background Particles -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-10">
-      <div
-        v-for="i in 6"
-        :key="i"
-        class="bg-particle absolute w-24 h-24 rounded-full bg-primary-400/30 blur-3xl"
-        :style="{
-          left: `${10 + (i * 15) % 80}%`,
-          top: `${5 + (i * 20) % 70}%`,
-          animationDelay: `${i * 0.5}s`,
-        }"
-      ></div>
-    </div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      <!-- Back Button -->
-      <button
-        @click="router.back()"
-        class="inline-flex items-center gap-1.5 text-sm text-surface-500 dark:text-surface-400 hover:text-primary-500 dark:hover:text-primary-400 mb-6 transition-all duration-200 group"
-      >
-        <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        {{ i18n.t('detail.back') }}
-      </button>
-
+  <div class="game-detail-root min-h-screen bg-[#1A1919] text-white">
+    <div ref="pageRef" class="relative">
       <!-- Loading State -->
-      <template v-if="gameStore.loading">
+      <div v-if="gameStore.loading" class="max-w-[1500px] mx-auto px-4 py-8">
         <LoadingSkeleton variant="detail" :count="4" />
-      </template>
+      </div>
 
       <!-- Error State -->
-      <div
-        v-else-if="gameStore.error"
-        class="text-center py-16"
-      >
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
-          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div v-else-if="gameStore.error" class="max-w-md mx-auto text-center py-20 px-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-900/30 text-red-500 mb-4 border border-red-500/20">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <p class="text-surface-500 dark:text-surface-400 mb-4">{{ gameStore.error }}</p>
+        <p class="text-gray-400 mb-4 text-sm">{{ gameStore.error }}</p>
         <button
           @click="gameStore.fetchProducts(gameCode)"
-          class="btn-primary text-sm"
+          class="px-5 py-2 rounded-xl bg-[#C70C00] hover:bg-[#E80F00] text-white font-bold text-sm transition-all"
         >
           {{ i18n.t('detail.tryAgain') }}
         </button>
       </div>
 
-      <!-- Game Detail -->
+      <!-- Game Detail Content -->
       <template v-else-if="gameStore.selectedGame">
-        <!-- Game Header -->
-        <div ref="headerRef" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-900 via-surface-800 to-primary-900 dark:from-surface-950 dark:via-surface-900 dark:to-primary-950 mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8 shadow-xl max-h-[140px] sm:max-h-[200px]">
-          <!-- Background image with parallax overlay -->
-          <div class="parallax-header-bg absolute inset-0 opacity-10 will-change-transform">
-            <img
-              :src="gameStore.selectedGame.image_url"
-              :alt="gameStore.selectedGame.name"
-              class="w-full h-full object-cover"
-            />
-          </div>
+        <!-- ═══ TOP GAME BANNER & HERO ═══ -->
+        <div ref="headerRef" class="relative w-full select-none">
+          <div class="relative w-full overflow-hidden bg-gradient-to-b from-[#1A1919] to-[#2A2A2A] flex flex-col shadow-lg shadow-black/20">
+            <!-- Parallax Cover Banner -->
+            <div class="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-[#2A2A2A]">
+              <!-- Back Button -->
+              <button
+                @click="router.back()"
+                class="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/10 text-white text-xs font-semibold transition-all duration-200 cursor-pointer group"
+              >
+                <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Back</span>
+              </button>
 
-          <!-- Balance badge (top-right corner) -->
-          <div
-            v-if="!balanceLoading"
-            :title="`Wallet balance: $${walletBalance.toFixed(2)}`"
-            :class="['absolute top-2 right-2 sm:top-3 sm:right-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-semibold backdrop-blur-sm transition-all duration-300', balanceBadgeColors]"
-          >
-            <span :class="['w-1.5 h-1.5 rounded-full', balanceDotColors]"></span>
-            <svg
-              class="w-2.5 h-2.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                :d="balanceIcon"
-              />
-            </svg>
-            {{ balanceLabel }}
-          </div>
-
-          <div              class="relative flex items-center gap-3 sm:gap-5"
-            >
-            <!-- Game Icon -->
-            <div class="anim-item w-12 h-12 sm:w-20 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-lg shrink-0 transform hover:scale-105 transition-transform duration-300">
-              <img
-                :src="gameStore.selectedGame.image_url"
-                :alt="gameStore.selectedGame.name"
-                class="w-full h-full object-cover"
-              />
-            </div>
-            <div class="anim-item min-w-0">
-              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white/10 backdrop-blur-sm rounded-full text-[10px] sm:text-xs font-medium text-white/80 mb-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                {{ gameStore.categories.find(c => c.game_code === gameCode)?.game_fields?.join(' + ') || 'ID' }}
+              <!-- Wallet Balance Badge -->
+              <div
+                v-if="!balanceLoading"
+                :title="`Wallet balance: $${walletBalance.toFixed(2)}`"
+                :class="['absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold backdrop-blur-md transition-all duration-300', balanceBadgeColors]"
+              >
+                <span :class="['w-1.5 h-1.5 rounded-full', balanceDotColors]"></span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="balanceIcon" />
+                </svg>
+                <span>{{ balanceLabel }}</span>
               </div>
-              <h1 class="text-base sm:text-xl lg:text-2xl font-bold text-white truncate">
-                {{ gameStore.selectedGame.name }}
-              </h1>
-              <p class="mt-1 sm:mt-2 text-[11px] sm:text-sm text-white/60 line-clamp-1 max-w-xl">
-                {{ gameStore.selectedGame.description }}
-              </p>
 
+              <!-- Cover image -->
+              <img
+                :alt="gameDisplayName"
+                class="parallax-header-bg w-full h-full object-cover opacity-90"
+                loading="eager"
+                :src="gameImageUrl"
+              />
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1A1919]/85"></div>
+            </div>
+
+            <!-- Game Info Header Details -->
+            <div class="w-full max-w-[1500px] mx-auto px-3 sm:px-6 py-4 relative z-10">
+              <div class="flex items-start gap-4 sm:gap-5">
+                <!-- Avatar / Logo -->
+                <div class="flex-shrink-0">
+                  <img
+                    :alt="gameDisplayName"
+                    class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl object-cover border-2 border-[#3A3A3A] shadow-xl bg-[#2A2A2A]"
+                    :src="gameImageUrl"
+                  />
+                </div>
+
+                <!-- Info Column -->
+                <div class="flex-grow text-left">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-white text-base uppercase sm:text-2xl md:text-3xl font-bold tracking-wide leading-tight drop-shadow-lg">
+                      {{ gameDisplayName }}
+                    </h1>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-sm">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span class="font-bold uppercase tracking-wider">
+                        {{ playerNickname || 'VIDTOPUP' }}
+                      </span>
+                      <div class="flex items-center ml-0.5">
+                        <img alt="KH flag" class="w-[16px] h-[11px] object-cover inline-block align-middle rounded-[2px] shadow-sm border border-[#3A3A3A]/30" src="https://flagcdn.com/w20/kh.png">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-2 mt-2">
+                    <div class="group inline-flex items-center gap-1 text-gray-300 text-[11px] font-semibold bg-[#2A2A2A] px-2.5 py-1 rounded-lg border border-[#3A3A3A] hover:border-[#C70C00]/40 transition-all duration-300">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="text-gray-400 group-hover:text-[#C70C00] transition-colors"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg>
+                      <span>Global</span>
+                    </div>
+                    <div class="group inline-flex items-center gap-1 text-gray-300 text-[11px] font-medium bg-[#2A2A2A] px-2.5 py-1 rounded-lg border border-[#3A3A3A] hover:border-[#C70C00]/40 transition-all duration-300">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="text-gray-400 group-hover:text-[#C70C00] transition-colors"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"></path></svg>
+                      <span>Instant Delivery</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div class="flex items-start gap-2 text-[10px] sm:text-xs text-gray-400 border-t border-[#3A3A3A] pt-3 mt-4">
+                <span class="mt-0.5 flex-shrink-0">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 flex-shrink-0"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+                </span>
+                <p class="leading-normal"><span class="font-bold text-gray-300">Important Note:</span> Incorrect Player IDs may result in failed delivery pipeline parameters.</p>
+              </div>
+            </div>
+
+            <!-- Marquee Ticker -->
+            <div class="relative w-full flex items-center overflow-hidden bg-[#2A2A2A] border-t border-[#3A3A3A]" style="height: 36px;">
+              <div class="flex whitespace-nowrap ticker-track">
+                <span class="flex items-center gap-4 px-3 text-[11px] font-normal">
+                  <span class="relative inline-flex items-center font-bold text-[9px] tracking-wider uppercase px-2 py-0.5 rounded-md text-white overflow-hidden">
+                    <span class="absolute inset-0 bg-gradient-to-r from-[#C70C00] to-[#E80F00]"></span>
+                    <span class="relative">Platform</span>
+                  </span>
+                  <span class="truncate text-gray-300 max-w-[400px] sm:max-w-none font-medium">VIDTOPUP is a trusted gaming top-up platform with partnerships with 30+ game companies worldwide, providing safe, fast, and convenient recharge for millions of players.</span>
+                  <span class="text-[#3A3A3A] mx-2">•</span>
+                </span>
+                <span class="flex items-center gap-4 px-3 text-[11px] font-normal">
+                  <span class="relative inline-flex items-center font-bold text-[9px] tracking-wider uppercase px-2 py-0.5 rounded-md text-white overflow-hidden">
+                    <span class="absolute inset-0 bg-gradient-to-r from-[#C70C00] to-[#E80F00]"></span>
+                    <span class="relative">Instant</span>
+                  </span>
+                  <span class="truncate text-gray-300 max-w-[400px] sm:max-w-none font-medium">Instant automated delivery 24/7. Verified player name check powered by official game API.</span>
+                  <span class="text-[#3A3A3A] mx-2">•</span>
+                </span>
+                <span class="flex items-center gap-4 px-3 text-[11px] font-normal">
+                  <span class="relative inline-flex items-center font-bold text-[9px] tracking-wider uppercase px-2 py-0.5 rounded-md text-white overflow-hidden">
+                    <span class="absolute inset-0 bg-gradient-to-r from-[#C70C00] to-[#E80F00]"></span>
+                    <span class="relative">Platform</span>
+                  </span>
+                  <span class="truncate text-gray-300 max-w-[400px] sm:max-w-none font-medium">VIDTOPUP is a trusted gaming top-up platform with partnerships with 30+ game companies worldwide, providing safe, fast, and convenient recharge for millions of players.</span>
+                  <span class="text-[#3A3A3A] mx-2">•</span>
+                </span>
+                <span class="flex items-center gap-4 px-3 text-[11px] font-normal">
+                  <span class="relative inline-flex items-center font-bold text-[9px] tracking-wider uppercase px-2 py-0.5 rounded-md text-white overflow-hidden">
+                    <span class="absolute inset-0 bg-gradient-to-r from-[#C70C00] to-[#E80F00]"></span>
+                    <span class="relative">Instant</span>
+                  </span>
+                  <span class="truncate text-gray-300 max-w-[400px] sm:max-w-none font-medium">Instant automated delivery 24/7. Verified player name check powered by official game API.</span>
+                  <span class="text-[#3A3A3A] mx-2">•</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          <!-- Products Column (left on desktop) -->
-          <div ref="productsContainerRef" class="lg:col-span-7 space-y-6 order-2 lg:order-1">
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold text-surface-900 dark:text-surface-100">
-                {{ i18n.t('detail.selectPackage') }}
-              </h2>
-              <span class="text-xs text-surface-400 dark:text-surface-500">
-                {{ gameStore.products.length }} {{ i18n.t('search.games') }}
-              </span>
+        <!-- ═══ MOBILE ONLY: Account Info Card (Under Hero) ═══ -->
+        <div class="block lg:hidden mt-3 px-2">
+          <div class="bg-gradient-to-br from-[#1A1919] to-[#2A2A2A] border border-[#3A3A3A] rounded-2xl px-3 py-4 max-w-md mx-auto shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-[#2A2A2A] border border-[#3A3A3A] flex items-center justify-center text-white shadow-sm">
+                  <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 16 16" fill="currentColor"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path></svg>
+                </div>
+                <h2 class="text-xs font-bold tracking-wide text-gray-300 uppercase">Account Info</h2>
+              </div>
+              <button
+                type="button"
+                @click="showServerIdHelp = !showServerIdHelp"
+                class="text-gray-500 transition-all duration-200 outline-none hover:text-[#C70C00] cursor-pointer"
+                title="Can't find your ID?"
+                aria-label="Can't find your ID?"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                  <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.326 0-2.786.647-2.754 2.533m1.562 5.516c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.01.388-1.01.94"></path>
+                </svg>
+              </button>
             </div>
 
-            <!-- Sort / Filter chips -->
+            <div class="space-y-1">
+              <div :class="['overflow-hidden transition-all duration-300 ease-in-out', showServerIdHelp ? 'max-h-60 opacity-100 mb-3' : 'max-h-0 opacity-0 pointer-events-none']">
+                <div class="bg-[#2A2A2A] border border-[#3A3A3A] rounded-2xl p-3 space-y-2">
+                  <ol class="text-[11px] text-gray-400 space-y-1 list-decimal pl-4 font-medium">
+                    <li>Open the game application</li>
+                    <li>Tap your profile picture/avatar</li>
+                    <li>Copy your User ID and Zone ID</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="grid gap-3" :class="needsServerId ? 'grid-cols-3' : 'grid-cols-1'">
+                  <div :class="needsServerId ? 'col-span-2' : 'col-span-1'" class="relative">
+                    <label class="absolute -top-2 left-3 bg-[#1A1919] px-1.5 text-[9px] font-bold text-gray-400 uppercase z-10 tracking-wider rounded-sm">Game ID</label>
+                    <input
+                      v-model="playerId"
+                      autocomplete="off"
+                      class="w-full bg-[#2A2A2A] border rounded-xl px-3 py-2 text-sm text-white font-semibold outline-none transition-all"
+                      :class="verified ? 'border-[#C70C00]/60 bg-[#C70C00]/10' : 'border-[#3A3A3A] focus:border-[#C70C00]/60'"
+                      placeholder="Enter game ID"
+                      type="text"
+                      :disabled="verifying"
+                    />
+                  </div>
+                  <div v-if="needsServerId" class="col-span-1 relative">
+                    <label class="absolute -top-2 left-3 bg-[#1A1919] px-1.5 text-[9px] font-bold text-gray-400 uppercase z-10 tracking-wider rounded-sm">Zone ID</label>
+                    <input
+                      v-model="serverId"
+                      inputmode="numeric"
+                      class="w-full bg-[#2A2A2A] border rounded-xl px-3 py-2 text-sm text-white font-semibold outline-none transition-all"
+                      :class="verified ? 'border-[#C70C00]/60 bg-[#C70C00]/10' : 'border-[#3A3A3A] focus:border-[#C70C00]/60'"
+                      placeholder="Zone ID"
+                      type="text"
+                      :disabled="verifying"
+                    />
+                  </div>
+                </div>
+
+                <div v-if="verified && playerNickname" class="flex items-center gap-1.5 px-1">
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Username:</span>
+                  <span class="text-xs font-bold text-emerald-400">{{ playerNickname }}</span>
+                  <div class="flex items-center ml-0.5">
+                    <img alt="KH flag" class="w-[18px] h-[13px] object-cover inline-block align-middle rounded-[2px] shadow-sm border border-[#3A3A3A]/30" src="https://flagcdn.com/w20/kh.png">
+                  </div>
+                </div>
+
+                <!-- Saved Chips Mobile -->
+                <div v-if="savedForGame.length > 0 && !verified" class="pt-1 flex flex-wrap gap-1.5">
+                  <button
+                    v-for="saved in savedForGame"
+                    :key="saved.playerId + (saved.serverId || '')"
+                    @click="selectSavedPlayer(saved)"
+                    class="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] text-left text-[11px] text-gray-300 flex items-center gap-1.5 transition-all"
+                  >
+                    <span class="font-bold text-white">{{ saved.nickname }}</span>
+                    <span class="text-[10px] text-gray-500 font-mono">{{ saved.playerId }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Status footer -->
+              <div class="mt-4 pt-3 flex items-center justify-between border-t border-[#3A3A3A] px-0.5">
+                <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+                  <span class="text-gray-400 font-bold text-[10px] flex-shrink-0 uppercase">Status:</span>
+                  <span v-if="verifying" class="font-bold text-[11px] text-amber-400 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    Checking...
+                  </span>
+                  <span v-else-if="verified" class="font-bold text-[11px] min-h-[15px] block truncate flex items-center gap-1 text-emerald-400">
+                    <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 16 16" fill="currentColor"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path></svg>
+                    <span class="text-emerald-400">Verified</span>
+                  </span>
+                  <span v-else-if="verifyError" class="font-bold text-[11px] text-red-400 truncate">
+                    {{ verifyError }}
+                  </span>
+                  <span v-else class="text-gray-500 text-[11px]">Enter Game ID</span>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0" :class="canProceed ? 'text-emerald-400' : 'text-gray-500'">
+                  <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"></path></svg>
+                  <span class="font-bold uppercase text-[9px] tracking-wider">{{ canProceed ? 'Ready' : 'Pending' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ MAIN 3-COLUMN LAYOUT (lg:grid-cols-3) ═══ -->
+        <div class="mx-auto max-w-[1500px] grid grid-cols-1 lg:grid-cols-3 gap-4 mt-3 px-2 sm:px-4">
+          <!-- Left Packages Column (lg:col-span-2) -->
+          <div ref="productsContainerRef" class="lg:col-span-2 space-y-3">
+            <!-- Sort Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
               <button
-                v-for="opt in ([{ mode: 'default' as SortMode, label: 'Default', tooltip: '' }, { mode: 'most-popular' as SortMode, label: 'Most Popular', tooltip: 'Mid-tier package — often the most purchased option' }, { mode: 'best-value' as SortMode, label: 'Best Value', tooltip: 'Lowest price per ' + gameCurrency + ' — best deal' }, { mode: 'cheapest' as SortMode, label: 'Cheapest', tooltip: 'Lowest total price' }, { mode: 'price-high' as SortMode, label: 'Price: High to Low', tooltip: 'Highest total price first' }])"
+                v-for="opt in ([{ mode: 'default' as SortMode, label: 'Default' }, { mode: 'most-popular' as SortMode, label: 'Most Popular' }, { mode: 'best-value' as SortMode, label: 'Best Value' }, { mode: 'cheapest' as SortMode, label: 'Cheapest' }, { mode: 'price-high' as SortMode, label: 'Price: High to Low' }])"
                 :key="opt.mode"
                 @click="activeSort = opt.mode"
-                :title="opt.tooltip"
                 :class="[
-                  'shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200',
+                  'shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer',
                   activeSort === opt.mode
-                    ? 'bg-primary-500 text-white border-primary-500 shadow-sm shadow-primary-500/20'
-                    : 'bg-white dark:bg-surface-900 text-surface-500 dark:text-surface-400 border-surface-200 dark:border-surface-700 hover:border-primary-300 dark:hover:border-primary-600 hover:text-primary-600 dark:hover:text-primary-400'
+                    ? 'bg-[#C70C00] text-white border-[#C70C00] shadow-sm'
+                    : 'bg-[#2A2A2A] text-gray-400 border-[#3A3A3A] hover:border-[#C70C00]/50 hover:text-white'
                 ]"
               >
-                <svg
-                  v-if="opt.mode === 'most-popular'"
-                  class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"
-                >
-                  <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-                <svg
-                  v-if="opt.mode === 'best-value'"
-                  class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"
-                >
-                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <svg
-                  v-if="opt.mode === 'cheapest'"
-                  class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                <svg
-                  v-if="opt.mode === 'default'"
-                  class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-                <svg
-                  v-if="opt.mode === 'price-high'"
-                  class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
                 {{ opt.label }}
               </button>
-              <!-- Reset sort button (only visible when not on Default) -->
-              <Transition name="reset-fade">
-                <button
-                  v-if="activeSort !== 'default'"
-                  @click="activeSort = 'default'"
-                  :title="'Reset to default order'"
-                  class="shrink-0 inline-flex items-center gap-1 px-2 py-1.5 rounded-full text-[10px] font-semibold border border-red-200 dark:border-red-800/40 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 active:scale-95 transition-all duration-200"
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Reset
-                </button>
-              </Transition>
-              <!-- Package count badge -->
-              <span class="shrink-0 ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-[10px] font-mono font-semibold text-surface-400 dark:text-surface-500 border border-surface-200 dark:border-surface-700" :title="gameStore.products.length + ' packages available'">
-                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                {{ gameStore.products.length }}
-              </span>
             </div>
 
-            <div v-if="gameStore.products.length === 0" class="text-center py-12 bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700">
-              <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-100 dark:bg-surface-800 mb-3">
-                <svg class="w-6 h-6 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
+            <!-- Empty State -->
+            <div v-if="gameStore.products.length === 0" class="text-center py-16 bg-[#2A2A2A] rounded-2xl border border-[#3A3A3A]">
+              <p class="text-sm text-gray-400">No packages available yet</p>
+            </div>
+
+            <!-- Best Selling Section (if any) -->
+            <div v-if="bestSellingProducts.length > 0" id="section-best-selling" class="mb-2">
+              <div class="flex items-center gap-1.5 mb-2.5 p-2">
+                <div class="w-1.5 h-3 rounded-full bg-[#C70C00]"></div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Best Selling</h3>
+                <span class="text-[10px] font-bold text-gray-400 bg-[#C70C00]/10 border border-[#C70C00]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  {{ bestSellingProducts.length }} items
+                </span>
               </div>
-              <p class="text-sm text-surface-500 dark:text-surface-400">No packages available yet</p>
+              <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                <ProductCard
+                  v-for="product in bestSellingProducts"
+                  :key="product.product_code"
+                  :product="product"
+                  :selected="selectedProduct?.product_code === product.product_code"
+                  :game-code="gameCode"
+                  :game-image-url="gameImageUrl"
+                  :badge="productsNeedingBalanceCheck.has(product.product_code) ? 'balance-check' : productsWithPriceDrop.has(product.product_code) ? 'price-drop' : productsNeedingNewBadge.has(product.product_code) ? 'new' : (productBadges.get(product.product_code) || null)"
+                  @select="selectProduct(product)"
+                />
+              </div>
             </div>
 
-            <div ref="productsListRef" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-              <ProductCard
-                v-for="product in sortedProducts"
-                :key="product.product_code"
-                :product="product"
-                :selected="selectedProduct?.product_code === product.product_code"
-                :game-code="gameCode"
-                :game-image-url="gameImageUrl"
-                :badge="productsNeedingBalanceCheck.has(product.product_code) ? 'balance-check' : productsWithPriceDrop.has(product.product_code) ? 'price-drop' : productsNeedingNewBadge.has(product.product_code) ? 'new' : (productBadges.get(product.product_code) || null)"
-                @select="selectProduct(product)"
-                class="product-card"
-              />
+            <!-- General Packages Section -->
+            <div id="section-general" class="mb-2">
+              <div class="flex items-center gap-1.5 mb-2.5 p-2">
+                <div class="w-1.5 h-3 rounded-full bg-[#C70C00]"></div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">General</h3>
+                <span class="text-[10px] font-bold text-gray-400 bg-[#C70C00]/10 border border-[#C70C00]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  {{ generalProducts.length }} items
+                </span>
+              </div>
+              <div ref="productsListRef" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                <ProductCard
+                  v-for="product in generalProducts"
+                  :key="product.product_code"
+                  :product="product"
+                  :selected="selectedProduct?.product_code === product.product_code"
+                  :game-code="gameCode"
+                  :game-image-url="gameImageUrl"
+                  :badge="productsNeedingBalanceCheck.has(product.product_code) ? 'balance-check' : productsWithPriceDrop.has(product.product_code) ? 'price-drop' : productsNeedingNewBadge.has(product.product_code) ? 'new' : (productBadges.get(product.product_code) || null)"
+                  @select="selectProduct(product)"
+                />
+              </div>
             </div>
           </div>
 
-          <!-- Order Form Column (right on desktop) -->
-          <div ref="formRef" class="lg:col-span-5 order-1 lg:order-2">
-            <div class="sticky top-24 space-y-5">
-              <!-- Player ID Card (compact) -->
-              <div class="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm overflow-hidden">
-                <div class="p-2.5 sm:p-4 space-y-2.5 sm:space-y-4">
-                  <!-- Header row: icon + title + currency badge -->
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
-                        <svg class="w-3 h-3 sm:w-4 sm:h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 class="text-xs sm:text-sm font-semibold text-surface-900 dark:text-surface-100">{{ i18n.t('verify.title') }}</h3>
-                      </div>
+          <!-- Right Sidebar Column (Desktop Sticky) -->
+          <div ref="formRef" class="hidden lg:block lg:sticky lg:top-10 h-fit space-y-4">
+            <!-- Desktop Account Info Card -->
+            <div class="px-2 select-none">
+              <div class="bg-gradient-to-br from-[#1A1919] to-[#2A2A2A] border border-[#3A3A3A] rounded-2xl px-3 py-4 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-[#2A2A2A] border border-[#3A3A3A] flex items-center justify-center text-white shadow-sm">
+                      <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 16 16" fill="currentColor"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path></svg>
                     </div>
-                    <!-- Currency badge -->
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded-full text-[10px] font-semibold text-primary-600 dark:text-primary-400">
-                      <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {{ gameCurrency }}
-                    </span>
+                    <h2 class="text-xs font-bold tracking-wide text-gray-300 uppercase">Account Info</h2>
+                  </div>
+                  <button
+                    type="button"
+                    @click="showServerIdHelp = !showServerIdHelp"
+                    class="text-gray-500 transition-all duration-200 outline-none hover:text-[#C70C00] cursor-pointer"
+                    title="Can't find your ID?"
+                    aria-label="Can't find your ID?"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                      <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.326 0-2.786.647-2.754 2.533m1.562 5.516c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.01.388-1.01.94"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="space-y-1">
+                  <!-- Help Drawer -->
+                  <div :class="['overflow-hidden transition-all duration-300 ease-in-out', showServerIdHelp ? 'max-h-60 opacity-100 mb-3' : 'max-h-0 opacity-0 pointer-events-none']">
+                    <div class="bg-[#2A2A2A] border border-[#3A3A3A] rounded-2xl p-3 space-y-2">
+                      <ol class="text-[11px] text-gray-400 space-y-1 list-decimal pl-4 font-medium">
+                        <li>Open the game application</li>
+                        <li>Tap your profile picture/avatar</li>
+                        <li>Copy your User ID and Zone ID</li>
+                      </ol>
+                    </div>
                   </div>
 
-                  <!-- Player ID + Server ID in one row -->
-                  <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                    <!-- Player ID (spans full width when no server ID needed) -->
-                    <div :class="needsServerId ? 'col-span-1' : 'col-span-2'">
-                      <label for="player-id" class="block text-[10px] sm:text-xs font-medium text-surface-500 dark:text-surface-400 mb-0.5">
-                        {{ i18n.t('detail.playerId') }}
-                      </label>
-                      <div class="relative">
-                        <div class="absolute left-2.5 top-1/2 -translate-y-1/2 text-surface-300 dark:text-surface-500">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0" />
-                          </svg>
-                        </div>
+                  <div class="space-y-3">
+                    <div class="grid gap-3" :class="needsServerId ? 'grid-cols-3' : 'grid-cols-1'">
+                      <div :class="needsServerId ? 'col-span-2' : 'col-span-1'" class="relative">
+                        <label class="absolute -top-2 left-3 bg-[#1A1919] px-1.5 text-[9px] font-bold text-gray-400 uppercase z-10 tracking-wider rounded-sm">Game ID</label>
                         <input
-                          id="player-id"
                           v-model="playerId"
+                          autocomplete="off"
+                          class="w-full bg-[#2A2A2A] border rounded-xl px-3 py-2 text-sm text-white font-semibold outline-none transition-all"
+                          :class="verified ? 'border-[#C70C00]/60 bg-[#C70C00]/10' : 'border-[#3A3A3A] focus:border-[#C70C00]/60'"
+                          placeholder="Enter game ID"
                           type="text"
-                          :placeholder="i18n.t('detail.playerIdPlaceholder')"
-                          class="input-field pl-8 pr-8 h-8 sm:h-9 text-xs"
-                          :class="verified ? 'input-verified' : ''"
                           :disabled="verifying"
                         />
-                        <!-- Auto-verify status indicator → spinner fades out, checkmark pops in -->
-                        <div class="absolute right-2.5 top-1/2 -translate-y-1/2">
-                          <Transition name="status-swap" mode="out-in">
-                            <div v-if="verifying" key="spinner" role="status" aria-label="Auto-verifying player name">
-                              <svg class="w-3.5 h-3.5 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                              </svg>
-                            </div>
-                            <div v-else-if="verified" key="check">
-                              <div class="verified-pulse">
-                                <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" role="img" aria-label="Verified">
-                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                </svg>
-                              </div>
-                            </div>
-                          </Transition>
-                        </div>
                       </div>
-                      <!-- Brief 'Verified!' toast that fades in after checkmark settles -->
-                      <div v-if="verified" class="flex justify-end mt-0.5">
-                        <span class="verified-toast">
-                          <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                          </svg>
-                          Verified!
-                        </span>
-                      </div>
-                    </div>
-                    <!-- Server / Zone ID -->
-                    <div v-show="needsServerId" ref="serverIdRef" class="overflow-hidden">
-                      <label for="server-id" class="block text-[10px] sm:text-xs font-medium text-surface-500 dark:text-surface-400 mb-0.5">
-                        {{ i18n.t('detail.serverId') }}
-                      </label>
-                      <div class="relative">
-                        <div class="absolute left-2.5 top-1/2 -translate-y-1/2 text-surface-300 dark:text-surface-500">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                          </svg>
-                        </div>
+                      <div v-if="needsServerId" class="col-span-1 relative">
+                        <label class="absolute -top-2 left-3 bg-[#1A1919] px-1.5 text-[9px] font-bold text-gray-400 uppercase z-10 tracking-wider rounded-sm">Zone ID</label>
                         <input
-                          id="server-id"
                           v-model="serverId"
-                          type="text"
                           inputmode="numeric"
-                          :placeholder="i18n.t('detail.serverIdPlaceholder')"
-                          class="input-field pl-8 h-8 sm:h-9 text-xs"
-                          :class="verified ? 'input-verified' : ''"
+                          class="w-full bg-[#2A2A2A] border rounded-xl px-3 py-2 text-sm text-white font-semibold outline-none transition-all"
+                          :class="verified ? 'border-[#C70C00]/60 bg-[#C70C00]/10' : 'border-[#3A3A3A] focus:border-[#C70C00]/60'"
+                          placeholder="Zone ID"
+                          type="text"
                           :disabled="verifying"
                         />
                       </div>
                     </div>
-                  </div>
 
+                    <!-- Verified Nickname -->
+                    <div v-if="verified && playerNickname" class="flex items-center gap-1.5 px-1">
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Username:</span>
+                      <span class="text-xs font-bold text-emerald-400">{{ playerNickname }}</span>
+                      <div class="flex items-center ml-0.5">
+                        <img alt="KH flag" class="w-[18px] h-[13px] object-cover inline-block align-middle rounded-[2px] shadow-sm border border-[#3A3A3A]/30" src="https://flagcdn.com/w20/kh.png">
+                      </div>
+                    </div>
 
-
-                  <!-- Saved Players (localStorage) -->
-                  <div v-if="savedForGame.length > 0 && !verified" ref="savedChipsRef" class="pt-2">
-                    <p class="text-[10px] text-surface-400 dark:text-surface-500 font-medium uppercase tracking-wider mb-2">
-                      Previously Verified
-                    </p>
-                    <div class="flex flex-wrap gap-2">
+                    <!-- Previously Verified Quick Chips -->
+                    <div v-if="savedForGame.length > 0 && !verified" class="pt-1 flex flex-wrap gap-1.5">
                       <button
                         v-for="saved in savedForGame"
                         :key="saved.playerId + (saved.serverId || '')"
                         @click="selectSavedPlayer(saved)"
-                        class="saved-chip group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 text-left"
+                        class="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] text-left text-[11px] text-gray-300 flex items-center gap-1.5 transition-all cursor-pointer"
                       >
-                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                          {{ (saved.nickname[0] || '?').toUpperCase() }}
-                        </div>
-                        <div class="min-w-0">
-                          <p class="text-xs font-semibold text-surface-800 dark:text-surface-200 truncate max-w-[120px]">
-                            {{ saved.nickname }}
-                          </p>
-                          <p class="text-[10px] text-surface-400 dark:text-surface-500 font-mono">
-                            {{ saved.playerId }}<span v-if="saved.serverId"> ({{ saved.serverId }})</span>
-                          </p>
-                        </div>
-                        <svg class="w-3.5 h-3.5 text-surface-300 dark:text-surface-600 group-hover:text-primary-400 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                        <span class="font-bold text-white">{{ saved.nickname }}</span>
+                        <span class="text-[10px] text-gray-500 font-mono">{{ saved.playerId }}</span>
                       </button>
                     </div>
                   </div>
 
-                  <!-- Saved Players Badge (when verified but one exists) -->
-                  <div v-if="savedForGame.length > 0 && verified" class="pt-1">
-                    <span class="inline-flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400">
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                      Saved for quick access on your next visit
-                    </span>
-                  </div>
-
-                  <!-- Verification Error -->
-                  <div
-                    v-if="verifyError"
-                    ref="errorRef"
-                    class="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30 rounded-xl overflow-hidden"
-                  >
-                    <svg class="w-4 h-4 shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm text-red-700 dark:text-red-400">{{ verifyError }}</p>
-                      <button
-                        @click="handleVerify"
-                        class="mt-1 text-xs text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200 underline font-medium"
-                      >
-                        {{ i18n.t('verify.retry') }}
-                      </button>
+                  <!-- Status footer -->
+                  <div class="mt-4 pt-3 flex items-center justify-between border-t border-[#3A3A3A] px-0.5">
+                    <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+                      <span class="text-gray-400 font-bold text-[10px] flex-shrink-0 uppercase">Status:</span>
+                      <span v-if="verifying" class="font-bold text-[11px] text-amber-400 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        Checking...
+                      </span>
+                      <span v-else-if="verified" class="font-bold text-[11px] min-h-[15px] block truncate flex items-center gap-1 text-emerald-400">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 16 16" fill="currentColor"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path></svg>
+                        <span class="text-emerald-400">Verified</span>
+                      </span>
+                      <span v-else-if="verifyError" class="font-bold text-[11px] text-red-400 truncate">
+                        {{ verifyError }}
+                      </span>
+                      <span v-else class="text-gray-500 text-[11px]">Enter Game ID</span>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0" :class="canProceed ? 'text-emerald-400' : 'text-gray-500'">
+                      <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"></path></svg>
+                      <span class="font-bold uppercase text-[9px] tracking-wider">{{ canProceed ? 'Ready' : 'Pending' }}</span>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Verified Player Result Card (simplified) -->
-              <Transition name="result-card">
-                <div
-                  v-if="verified && playerNickname"
-                  ref="resultRef"
-                  class="overflow-hidden rounded-xl border border-emerald-200/50 dark:border-emerald-800/30 bg-emerald-50/60 dark:bg-emerald-900/10 shadow-sm"
-                >
-                  <div class="flex items-center gap-3 px-4 py-3">
-                    <!-- Simple success checkmark -->
-                    <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
-                      <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                      </svg>
+            <!-- Payment Method Card (Bakong / ABA KHQR) -->
+            <div class="w-full select-none p-2 space-y-3">
+              <div class="flex items-center justify-between px-0.5">
+                <span class="text-white text-xs sm:text-sm font-bold uppercase tracking-wide">Payment Method</span>
+                <span class="text-[11px] text-gray-400 font-medium flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  Secure Gateway
+                </span>
+              </div>
+              <div class="relative group overflow-hidden rounded-2xl bg-[#2A2A2A] border border-[#C70C00]/50 p-3.5 flex items-center justify-between transition-all duration-200 shadow-lg">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-[#C70C00]/10 blur-xl rounded-full pointer-events-none"></div>
+                <div class="flex items-center gap-3 relative z-10">
+                  <div class="h-12 w-12 flex flex-col items-center justify-center p-1 bg-[#1A1919] border border-[#3A3A3A] rounded-xl shadow-sm flex-shrink-0">
+                    <img alt="KHQR" class="w-full h-full object-contain rounded-lg" src="/khqr.png">
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-white text-sm font-bold leading-tight">Bakong / ABA KHQR</span>
                     </div>
-                    <!-- Nickname in banner -->
-                    <div class="min-w-0 flex-1">
-                      <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{{ i18n.t('verify.success') }}</p>
-                      <p class="font-bold text-sm text-emerald-800 dark:text-emerald-200 truncate">
-                        {{ playerNickname }}
-                      </p>
-                    </div>
-                    <!-- Region chip (compact) -->
-                    <span
-                      v-if="playerRegion"
-                      class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 bg-white/60 dark:bg-surface-800/60 rounded-full text-[9px] font-semibold text-surface-500 dark:text-surface-400 border border-surface-200/50 dark:border-surface-700/50"
-                    >
-                      <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {{ playerRegion }}                  </span>
+                    <p class="text-[11px] text-gray-400 font-medium mt-0.5">Scan to pay with any banking app</p>
                   </div>
                 </div>
-              </Transition>
+                <div class="w-4 h-4 rounded-full border-2 border-[#C70C00] flex items-center justify-center flex-shrink-0 bg-transparent">
+                  <div class="w-2 h-2 rounded-full bg-[#C70C00]"></div>
+                </div>
+              </div>
 
-              <!-- Desktop Proceed to Pay Now (Unified) -->
-              <Transition name="proceed-btn">
-                <button
-                  ref="proceedBtnRef"
-                  v-if="canProceed"
-                  @click="handlePayNow"
-                  class="hidden lg:flex w-full items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-600 to-[#e41e26] hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/35 transition-all duration-300 active:scale-[0.98] group relative overflow-hidden"
-                >
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                    <path d="M14 14h3v3h-3zM17 17h4v4h-4z" />
-                  </svg>
-                  <span>Pay Now</span>
-                  <span v-if="selectedProduct" class="opacity-90 font-semibold text-sm">
-                    • {{ formatPrice(selectedProduct.sell_price).formatted }}
-                  </span>
-                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                  <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
-                </button>
-              </Transition>
-
+              <!-- Desktop Pay Now Button -->
+              <button
+                v-if="canProceed"
+                ref="proceedBtnRef"
+                @click="handlePayNow"
+                class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#C70C00] to-[#E80F00] hover:from-[#E80F00] hover:to-[#C70C00] text-white font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#C70C00]/30 transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                  <path d="M14 14h3v3h-3zM17 17h4v4h-4z" />
+                </svg>
+                <span>Pay Now • {{ formatPrice(selectedProduct?.sell_price || 0).formatted }}</span>
+              </button>
+              <button
+                v-else
+                disabled
+                class="w-full py-3 px-4 rounded-xl bg-[#2A2A2A] border border-[#3A3A3A] text-gray-500 font-bold text-sm cursor-not-allowed text-center"
+              >
+                {{ !verified ? 'Enter & Verify Game ID' : 'Select a Package' }}
+              </button>
             </div>
           </div>
         </div>
       </template>
-    </div>
     </div>
 
     <!-- ═══ Scroll-to-top button ═══ -->
@@ -2104,5 +2183,26 @@ onUnmounted(() => {
 .reset-fade-leave-to {
   opacity: 0;
   transform: scale(0.85) translateX(-8px);
+}
+
+/* ─── SysTopUp Live Marquee Ticker ─── */
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 32s linear infinite running;
+  will-change: transform;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
 }
 </style>

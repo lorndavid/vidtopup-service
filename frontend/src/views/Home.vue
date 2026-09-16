@@ -441,13 +441,13 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-b from-surface-50 to-white dark:from-surface-950 dark:to-surface-900"
+    class="min-h-screen bg-[#1A1919] text-white"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
+    <div class="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-10">
       <!-- ═══ HERO BANNER CAROUSEL ═══ -->
       <div
         ref="bannerRef"
-        class="relative rounded-2xl overflow-hidden mb-10 sm:mb-14 lg:mb-16 bg-surface-200 dark:bg-surface-800 shadow-xl shadow-surface-300/20 dark:shadow-black/30 group"
+        class="relative rounded-2xl overflow-hidden mb-8 sm:mb-12 lg:mb-14 bg-[#2A2A2A] border border-[#3A3A3A] shadow-2xl shadow-black/40 group"
         @mouseenter="stopBannerAutoPlay"
         @mouseleave="startBannerAutoPlay"
       >
@@ -680,7 +680,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700/80 hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-300 hover:shadow-lg hover:shadow-[#C70C00]/10 hover:-translate-y-0.5"
               >
                 <div class="relative aspect-[4/3] overflow-hidden">
                   <img
@@ -787,7 +787,7 @@ onUnmounted(() => {
               >
                 <div
                   @click="navigateToGame(game.game_code)"
-                  class="group relative cursor-pointer rounded-2xl overflow-hidden bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700/80 hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:-translate-y-0.5"
+                  class="group relative cursor-pointer rounded-2xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-300 hover:shadow-lg hover:shadow-[#C70C00]/10 hover:-translate-y-0.5"
                 >
                   <div class="relative aspect-[4/3] overflow-hidden">
                     <img
@@ -911,7 +911,7 @@ onUnmounted(() => {
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search games..."
-                class="w-full pl-10 pr-4 py-2 bg-surface-100 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-surface-100 placeholder-surface-400 dark:placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/50 transition-all duration-200"
+                class="w-full pl-10 pr-4 py-2 bg-[#2A2A2A] border border-[#3A3A3A] rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#C70C00]/30 focus:border-[#C70C00]/60 transition-all duration-200"
               />
               <button
                 v-if="searchQuery"
@@ -975,7 +975,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl overflow-hidden bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                class="group relative cursor-pointer rounded-xl overflow-hidden bg-[#2A2A2A] border border-[#3A3A3A] hover:border-[#C70C00]/60 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
               >
                 <div class="aspect-[4/3] overflow-hidden">
                   <img
@@ -1004,7 +1004,7 @@ onUnmounted(() => {
         <div ref="ctaRef">
           <div class="max-w-lg mx-auto text-center">
             <div
-              class="p-5 sm:p-8 rounded-2xl bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700/80 shadow-sm"
+              class="p-5 sm:p-8 rounded-2xl bg-[#2A2A2A] border border-[#3A3A3A] shadow-lg"
             >
               <div class="flex items-center justify-center gap-2 mb-5">
                 <svg
