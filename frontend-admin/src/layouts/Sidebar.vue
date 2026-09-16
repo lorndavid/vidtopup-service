@@ -125,7 +125,8 @@ function navigateTo(path: string) {
   >
     <!-- Branding -->
     <div
-      class="flex items-center gap-3 h-16 px-4 border-b border-slate-200 dark:border-slate-700/50 cursor-pointer"
+      class="relative flex items-center h-16 border-b border-slate-200 dark:border-slate-700/50 cursor-pointer group"
+      :class="expanded ? 'px-4 gap-3' : 'justify-center'"
       @click="navigateTo('/')"
     >
       <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary-500/20">
@@ -137,18 +138,36 @@ function navigateTo(path: string) {
           <span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Admin Panel</span>
         </div>
       </Transition>
+
+      <!-- Collapsed Branding Tooltip -->
+      <div
+        v-if="!expanded"
+        class="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-150 ease-out"
+      >
+        <div class="relative flex items-center px-3 py-1.5 rounded-xl bg-black text-white text-xs font-bold tracking-tight shadow-xl shadow-black/30 whitespace-nowrap select-none">
+          <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-black rotate-45 rounded-xs"></div>
+          <span class="relative z-10">VidTopUp Admin</span>
+        </div>
+      </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+    <nav
+      class="flex-1 py-4 space-y-1.5"
+      :class="[
+        expanded ? 'px-3 overflow-y-auto' : 'px-2.5 overflow-visible',
+      ]"
+    >
       <template v-for="item in navItems" :key="item.label">
         <!-- Single item -->
         <div
           v-if="!item.children"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 group"
-          :class="isActive(item.route!) ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+          class="relative flex items-center rounded-xl cursor-pointer transition-all duration-150 group"
+          :class="[
+            expanded ? 'gap-3 px-3 py-2.5' : 'justify-center w-11 h-11 mx-auto',
+            isActive(item.route!) ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60',
+          ]"
           @click="navigateTo(item.route!)"
-          :title="!expanded ? item.label : undefined"
         >
           <AppIcon :name="item.icon" :size="22" :class="isActive(item.route!) ? 'scale-110 text-primary-600 dark:text-primary-400' : 'text-current'" class="flex-shrink-0" />
           <Transition name="fade">
@@ -162,13 +181,34 @@ function navigateTo(path: string) {
               {{ item.badge }}
             </span>
           </Transition>
+
+          <!-- Collapsed Item Tooltip -->
+          <div
+            v-if="!expanded"
+            class="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-150 ease-out"
+          >
+            <div class="relative flex items-center px-3 py-1.5 rounded-xl bg-black text-white text-xs font-bold tracking-tight shadow-xl shadow-black/30 whitespace-nowrap select-none">
+              <!-- Pointed Arrow -->
+              <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-black rotate-45 rounded-xs"></div>
+              <span class="relative z-10">{{ item.label }}</span>
+              <span
+                v-if="item.badge"
+                class="relative z-10 ml-2 px-1.5 py-0.5 rounded-md bg-primary-500 text-white text-[10px] font-bold"
+              >
+                {{ item.badge }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Accordion parent -->
-        <div v-else>
+        <div v-else class="relative group">
           <div
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 group"
-            :class="isChildActive(item.children) ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            class="flex items-center rounded-xl cursor-pointer transition-all duration-150"
+            :class="[
+              expanded ? 'gap-3 px-3 py-2.5' : 'justify-center w-11 h-11 mx-auto',
+              isChildActive(item.children) ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60',
+            ]"
             @click="expanded ? toggleMenu(item.label) : navigateTo(item.children[0].route)"
           >
             <AppIcon :name="item.icon" :size="22" class="flex-shrink-0" />
@@ -187,7 +227,33 @@ function navigateTo(path: string) {
             </Transition>
           </div>
 
-          <!-- Children (accordion) -->
+          <!-- Collapsed Accordion Flyout Menu -->
+          <div
+            v-if="!expanded"
+            class="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-150 ease-out"
+          >
+            <div class="relative py-2 px-1.5 rounded-xl bg-black text-white shadow-2xl shadow-black/40 min-w-[170px] border border-white/10 select-none">
+              <!-- Pointed Arrow -->
+              <div class="absolute -left-1 top-4 w-2.5 h-2.5 bg-black rotate-45 rounded-xs border-l border-b border-white/10"></div>
+              
+              <div class="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                {{ item.label }}
+              </div>
+              <div class="my-1 border-t border-white/10"></div>
+              
+              <div
+                v-for="child in item.children"
+                :key="child.label"
+                @click.stop="navigateTo(child.route)"
+                class="px-3 py-1.5 rounded-lg hover:bg-white/15 cursor-pointer text-xs font-medium text-slate-200 hover:text-white transition-colors flex items-center justify-between"
+                :class="isActive(child.route) ? 'text-primary-400 bg-white/10 font-bold' : ''"
+              >
+                <span>{{ child.label }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Children (accordion when expanded) -->
           <Transition name="slide-down">
             <div v-if="expanded && expandedMenus.has(item.label)" class="ml-6 mt-1 space-y-1">
               <div
@@ -207,9 +273,12 @@ function navigateTo(path: string) {
     </nav>
 
     <!-- User footer -->
-    <div class="p-4 border-t border-slate-200 dark:border-slate-700/50">
+    <div
+      class="relative p-4 border-t border-slate-200 dark:border-slate-700/50 group"
+      :class="!expanded ? 'flex justify-center cursor-pointer' : ''"
+    >
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
           {{ auth.username?.[0]?.toUpperCase() || 'A' }}
         </div>
         <Transition name="fade">
@@ -218,6 +287,17 @@ function navigateTo(path: string) {
             <span class="text-[10px] text-slate-400 dark:text-slate-500">Administrator</span>
           </div>
         </Transition>
+      </div>
+
+      <!-- Collapsed User Tooltip -->
+      <div
+        v-if="!expanded"
+        class="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-150 ease-out"
+      >
+        <div class="relative flex items-center px-3 py-1.5 rounded-xl bg-black text-white text-xs font-bold tracking-tight shadow-xl shadow-black/30 whitespace-nowrap select-none">
+          <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-black rotate-45 rounded-xs"></div>
+          <span class="relative z-10">{{ auth.username || 'Administrator' }}</span>
+        </div>
       </div>
     </div>
   </aside>
