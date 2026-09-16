@@ -103,8 +103,8 @@ function navigateAndClose(path: string) {
     :class="[
       'sticky top-0 z-50 transition-all duration-300',
       scrolled
-        ? 'backdrop-blur-xl bg-white/85 dark:bg-surface-950/85 border-b border-surface-200/60 dark:border-surface-800/60 shadow-lg shadow-black/5'
-        : 'backdrop-blur-md bg-white/70 dark:bg-surface-950/70 border-b border-transparent'
+        ? 'backdrop-blur-xl bg-white/90 dark:bg-[#0B0F17]/90 border-b border-slate-200/80 dark:border-white/[0.08] shadow-sm shadow-slate-900/5'
+        : 'backdrop-blur-md bg-white/75 dark:bg-[#0B0F17]/75 border-b border-transparent'
     ]"
     style="padding-top: env(safe-area-inset-top, 0px);"
   >
@@ -112,37 +112,36 @@ function navigateAndClose(path: string) {
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <router-link to="/" class="group">
-          <!-- ref lives on a real DOM element — a ref on <router-link> (a
-               component) hands GSAP a Vue proxy and produces
-               "Invalid property ... Missing plugin?" warnings -->
           <div ref="logoRef" class="flex items-center gap-2.5">
-          <!-- Logo image with animated gradient border -->
-          <div ref="logoImgRef" class="logo-ring relative w-10 h-10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-4deg]">
-            <!-- Animated conic gradient border -->
-            <div class="logo-ring__gradient absolute inset-0 rounded-xl"></div>
-            <!-- Inner surface (2px inset creates border gap) -->
-            <div class="absolute inset-[2px] rounded-[10px] bg-white dark:bg-surface-900 flex items-center justify-center overflow-hidden shadow-lg shadow-primary-500/15 group-hover:shadow-primary-500/30 transition-shadow duration-500">
-              <img
-                src="/logo.png"
-                alt="VidTopUp"
-                class="w-full h-full object-contain"
-              />
+            <!-- Logo image with animated gradient border -->
+            <div ref="logoImgRef" class="logo-ring relative w-10 h-10 transition-all duration-500 group-hover:scale-105 group-hover:rotate-[-2deg]">
+              <!-- Animated conic gradient border matching brand -->
+              <div class="logo-ring__gradient absolute inset-0 rounded-xl"></div>
+              <!-- Inner surface (2px inset creates border gap) -->
+              <div class="absolute inset-[2px] rounded-[10px] bg-white dark:bg-[#131926] flex items-center justify-center overflow-hidden shadow-md shadow-[#FF385C]/15 group-hover:shadow-[#FF385C]/30 transition-shadow duration-500">
+                <img
+                  src="/logo.png"
+                  alt="VidTopUp"
+                  class="w-full h-full object-contain"
+                />
+              </div>
             </div>
-          </div>
-          <!-- Brand name with gradient -->
-          <span class="text-lg font-bold font-heading bg-gradient-to-r from-surface-900 to-surface-700 dark:from-white dark:to-surface-300 bg-clip-text text-transparent group-hover:from-primary-600 group-hover:to-primary-400 transition-all duration-300">VidTopUp</span>
+            <!-- Brand name with high contrast clean typography -->
+            <span class="text-lg font-extrabold font-heading tracking-tight text-slate-900 dark:text-white group-hover:text-[#FF385C] transition-colors duration-300">
+              VidTopUp
+            </span>
           </div>
         </router-link>
 
         <!-- Desktop Nav -->
-        <nav class="hidden md:flex items-center gap-1">
+        <nav class="hidden md:flex items-center gap-1.5">
           <router-link
             to="/"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200',
+              'px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200',
               isActive('/')
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                : 'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                ? 'bg-[#FF385C]/10 text-[#FF385C] border border-[#FF385C]/25 shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
             ]"
           >
             <span class="flex items-center gap-1.5">
@@ -155,10 +154,10 @@ function navigateAndClose(path: string) {
           <router-link
             to="/orders"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200',
+              'px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200',
               isActive('/orders')
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                : 'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                ? 'bg-[#FF385C]/10 text-[#FF385C] border border-[#FF385C]/25 shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
             ]"
           >
             <span class="flex items-center gap-1.5">
@@ -175,17 +174,18 @@ function navigateAndClose(path: string) {
           <!-- Currency Toggle -->
           <button
             @click="toggleCurrency()"
-            class="px-3 py-1.5 text-xs font-bold rounded-xl border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 hover:border-primary-300 dark:hover:border-primary-600 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200"
-            :title="preferredCurrency === 'USD' ? 'Switch to KHR' : 'Switch to USD'"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 text-slate-700 dark:text-slate-200 hover:border-[#FF385C]/40 hover:text-[#FF385C] dark:hover:text-[#FF385C] transition-all duration-200 cursor-pointer select-none"
+            :title="preferredCurrency === 'USD' ? 'Currently USD. Click to switch to KHR' : 'Currently KHR. Click to switch to USD'"
           >
-            {{ preferredCurrency === 'USD' ? '៛ KHR' : '$ USD' }}
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>{{ preferredCurrency === 'USD' ? '$ USD' : '៛ KHR' }}</span>
           </button>
 
           <!-- Dark Mode Toggle -->
           <button
             @click="emit('toggle-dark')"
             :disabled="transitioning"
-            class="relative p-2 rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 hover:text-amber-500 dark:hover:text-amber-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-wait"
+            class="relative p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-amber-500 dark:hover:text-amber-400 border border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-wait cursor-pointer"
             :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
           >
             <!-- Sun icon (shown in dark mode, click to go light) -->
@@ -210,7 +210,7 @@ function navigateAndClose(path: string) {
             <!-- Loading spinner during transition -->
             <svg
               v-if="transitioning"
-              class="absolute inset-0 m-auto w-5 h-5 animate-spin-slow text-primary-400"
+              class="absolute inset-0 m-auto w-5 h-5 animate-spin-slow text-[#FF385C]"
               fill="none" viewBox="0 0 24 24"
             >
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" />
@@ -221,7 +221,7 @@ function navigateAndClose(path: string) {
           <!-- Mobile Menu Button -->
           <button
             @click="toggleMobileMenu"
-            class="md:hidden p-2 rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200"
+            class="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
             aria-label="Toggle mobile menu"
           >
             <svg v-if="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,16 +241,16 @@ function navigateAndClose(path: string) {
       >
         <div
           v-show="mobileMenuOpen"
-          class="md:hidden border-t border-surface-200 dark:border-surface-800 py-3 pb-4"
+          class="md:hidden border-t border-slate-200/80 dark:border-white/10 py-3 pb-4 space-y-1"
         >
           <router-link
             to="/"
             @click="closeMobile"
             :class="[
-              'block px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1',
+              'block px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200',
               isActive('/')
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                : 'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                ? 'bg-[#FF385C]/10 text-[#FF385C] border border-[#FF385C]/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
             ]"
           >
             <span class="flex items-center gap-2">
@@ -264,10 +264,10 @@ function navigateAndClose(path: string) {
             to="/orders"
             @click="closeMobile"
             :class="[
-              'block px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
+              'block px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200',
               isActive('/orders')
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                : 'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                ? 'bg-[#FF385C]/10 text-[#FF385C] border border-[#FF385C]/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
             ]"
           >
             <span class="flex items-center gap-2">
@@ -301,12 +301,10 @@ function navigateAndClose(path: string) {
   border-radius: inherit;
   background: conic-gradient(
     from 0deg,
-    #4d96ff,
-    #2563eb,
-    #8b5cf6,
-    #c084fc,
-    #2563eb,
-    #4d96ff
+    #FF385C,
+    #FF5E3A,
+    #F59E0B,
+    #FF385C
   );
   animation: logo-spin 3s linear infinite;
   z-index: 0;

@@ -401,7 +401,7 @@ onUnmounted(() => {
       <!-- ═══ HERO BANNER CAROUSEL ═══ -->
       <div
         ref="bannerRef"
-        class="relative rounded-2xl overflow-hidden mb-6 sm:mb-8 lg:mb-10 bg-[#131926]/90 border border-[#232D42] shadow-2xl shadow-black/40 group"
+        class="relative rounded-2xl overflow-hidden mb-6 sm:mb-8 lg:mb-10 bg-white dark:bg-[#131926]/90 border border-slate-200/80 dark:border-[#232D42] shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/40 group"
         @mouseenter="stopBannerAutoPlay"
         @mouseleave="startBannerAutoPlay"
       >
@@ -612,11 +612,11 @@ onUnmounted(() => {
           <div class="flex items-center justify-between mb-3 sm:mb-6">
             <div class="flex items-center gap-2.5 sm:gap-3">
               <div class="w-1.5 h-5 sm:h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
-              <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider">
+              <h2 class="text-sm sm:text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
                 Top Games
               </h2>
             </div>
-            <span class="sm:hidden text-[10px] font-medium text-slate-400 flex items-center gap-0.5 shrink-0">
+            <span class="sm:hidden text-[10px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-0.5 shrink-0">
               Scroll &rarr;
             </span>
           </div>
@@ -630,7 +630,7 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/70 transition-all duration-300 hover:shadow-[0_10px_25px_rgba(255,56,92,0.22)] hover:-translate-y-1 block select-none h-full"
+                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-[#131926]/90 border border-slate-200/80 dark:border-[#232D42] hover:border-[#FF385C]/70 transition-all duration-300 shadow-sm dark:shadow-none hover:shadow-[0_10px_25px_rgba(255,56,92,0.22)] hover:-translate-y-1 block select-none h-full"
               >
                 <!-- Badge for Top Games -->
                 <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10">
@@ -639,18 +639,18 @@ onUnmounted(() => {
                   </span>
                 </div>
 
-                <div class="aspect-[4/3] overflow-hidden bg-[#0B0F17] relative">
+                <div class="aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-[#0B0F17] relative">
                   <img
                     :src="game.image_url"
                     :alt="game.name"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
-                  <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-[#0B0F17] via-transparent to-transparent"></div>
                 </div>
 
-                <div class="p-2 sm:p-2.5 bg-[#131926]/90">
-                  <h3 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
+                <div class="p-2 sm:p-2.5 bg-white/95 dark:bg-[#131926]/90">
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-[#FF385C] transition-colors duration-200">
                     {{ game.name }}
                   </h3>
                 </div>
@@ -675,19 +675,19 @@ onUnmounted(() => {
                 class="w-1 h-5 sm:h-6 rounded-full bg-gradient-to-b from-primary-400 to-primary-600"
               ></div>
               <h2
-                class="text-base sm:text-lg font-bold text-surface-900 dark:text-white uppercase tracking-wider"
+                class="text-base sm:text-lg font-bold text-slate-900 dark:text-white uppercase tracking-wider"
               >
                 All Games
               </h2>
               <span
-                class="text-xs text-surface-400 dark:text-surface-500 font-mono"
+                class="text-xs text-slate-500 dark:text-surface-500 font-mono"
                 >({{ filteredOthers.length }})</span
               >
             </div>
 
             <div class="relative w-full sm:w-64">
               <svg
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-surface-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -703,12 +703,12 @@ onUnmounted(() => {
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search games..."
-                class="w-full pl-10 pr-4 py-2 bg-[#131926]/90 border border-[#232D42] rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#FF385C]/30 focus:border-[#FF385C]/60 transition-all duration-200"
+                class="w-full pl-10 pr-4 py-2 bg-slate-50/90 dark:bg-[#131926]/90 border border-slate-200 dark:border-[#232D42] rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#FF385C]/30 focus:border-[#FF385C] shadow-xs dark:shadow-none transition-all duration-200"
               />
               <button
                 v-if="searchQuery"
                 @click="searchQuery = ''"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-surface-300 transition-colors"
               >
                 <svg
                   class="w-4 h-4"
@@ -732,10 +732,10 @@ onUnmounted(() => {
             class="text-center py-12"
           >
             <div
-              class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-100 dark:bg-surface-800 mb-3"
+              class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-surface-800 mb-3"
             >
               <svg
-                class="w-6 h-6 text-surface-400"
+                class="w-6 h-6 text-slate-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -748,9 +748,9 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <p class="text-sm text-surface-500 dark:text-surface-400">
+            <p class="text-sm text-slate-500 dark:text-surface-400">
               No games matching
-              "<span class="text-surface-700 dark:text-surface-300 font-medium">{{
+              "<span class="text-slate-700 dark:text-surface-300 font-medium">{{
                 searchQuery
               }}</span>"
             </p>
@@ -767,9 +767,9 @@ onUnmounted(() => {
             >
               <div
                 @click="navigateToGame(game.game_code)"
-                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-[#131926]/90 border border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(255,56,92,0.16)] hover:-translate-y-1 block select-none h-full"
+                class="group relative cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-[#131926]/90 border border-slate-200/80 dark:border-[#232D42] hover:border-[#FF385C]/60 transition-all duration-300 shadow-sm dark:shadow-none hover:shadow-[0_8px_20px_rgba(255,56,92,0.16)] hover:-translate-y-1 block select-none h-full"
               >
-                <div class="aspect-[4/3] overflow-hidden bg-[#0B0F17] relative">
+                <div class="aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-[#0B0F17] relative">
                   <img
                     :src="game.image_url"
                     :alt="game.name"
@@ -777,12 +777,12 @@ onUnmounted(() => {
                     loading="lazy"
                   />
                   <div
-                    class="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/25 to-transparent"
+                    class="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-[#0B0F17] via-transparent to-transparent"
                   ></div>
                 </div>
-                <div class="p-1.5 sm:p-2.5 bg-[#131926]/90">
+                <div class="p-1.5 sm:p-2.5 bg-white/95 dark:bg-[#131926]/90">
                   <p
-                    class="text-[11px] sm:text-sm font-bold text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
+                    class="text-[11px] sm:text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-[#FF385C] transition-colors duration-200"
                   >
                     {{ game.name }}
                   </p>
@@ -796,7 +796,7 @@ onUnmounted(() => {
         <div ref="ctaRef">
           <div class="max-w-lg mx-auto text-center">
             <div
-              class="p-5 sm:p-8 rounded-2xl bg-[#131926]/90 border border-[#232D42] shadow-xl"
+              class="p-5 sm:p-8 rounded-2xl bg-white dark:bg-[#131926]/90 border border-slate-200/80 dark:border-[#232D42] shadow-lg shadow-slate-200/50 dark:shadow-xl dark:shadow-black/40"
             >
               <div class="flex items-center justify-center gap-2 mb-5">
                 <svg
@@ -813,7 +813,7 @@ onUnmounted(() => {
                   />
                 </svg>
                 <span
-                  class="text-xs text-surface-500 dark:text-surface-400 uppercase tracking-[0.2em] font-semibold"
+                  class="text-xs text-slate-500 dark:text-surface-400 uppercase tracking-[0.2em] font-semibold"
                   >Trusted &amp; Secure</span
                 >
               </div>
@@ -837,7 +837,7 @@ onUnmounted(() => {
                       />
                     </svg>
                   </div>
-                  <p class="text-[11px] text-surface-500 dark:text-surface-400 font-medium">
+                  <p class="text-[11px] text-slate-600 dark:text-surface-400 font-medium">
                     Secure<br />KHQR Pay
                   </p>
                 </div>
@@ -859,7 +859,7 @@ onUnmounted(() => {
                       />
                     </svg>
                   </div>
-                  <p class="text-[11px] text-surface-500 dark:text-surface-400 font-medium">
+                  <p class="text-[11px] text-slate-600 dark:text-surface-400 font-medium">
                     Instant<br />Delivery
                   </p>
                 </div>
@@ -881,7 +881,7 @@ onUnmounted(() => {
                       />
                     </svg>
                   </div>
-                  <p class="text-[11px] text-surface-500 dark:text-surface-400 font-medium">
+                  <p class="text-[11px] text-slate-600 dark:text-surface-400 font-medium">
                     Best<br />Prices
                   </p>
                 </div>
@@ -889,9 +889,9 @@ onUnmounted(() => {
             </div>
 
             <p
-              class="mt-5 text-[10px] text-surface-400 dark:text-surface-500 font-medium tracking-wider flex items-center justify-center gap-1.5"
+              class="mt-5 text-[10px] text-slate-500 dark:text-surface-500 font-medium tracking-wider flex items-center justify-center gap-1.5"
             >
-              <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg class="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <span>Powered for Cambodian Gamers — KHQR Payment via Bakong</span>
