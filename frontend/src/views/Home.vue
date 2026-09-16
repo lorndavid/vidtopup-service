@@ -366,17 +366,17 @@ onUnmounted(() => {
   <div
     class="min-h-screen bg-[#0B0F17] text-white"
   >
-    <div class="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <!-- ═══ HERO BANNER CAROUSEL ═══ -->
       <div
         ref="bannerRef"
-        class="relative rounded-2xl overflow-hidden mb-8 sm:mb-12 lg:mb-14 bg-[#131926]/90 border border-[#232D42] shadow-2xl shadow-black/40 group"
+        class="relative rounded-2xl overflow-hidden mb-6 sm:mb-8 lg:mb-10 bg-[#131926]/90 border border-[#232D42] shadow-2xl shadow-black/40 group"
         @mouseenter="stopBannerAutoPlay"
         @mouseleave="startBannerAutoPlay"
       >
         <!-- Slides container -->
         <div
-          class="relative w-full overflow-hidden bg-surface-100 dark:bg-surface-900 aspect-[5/3] sm:aspect-[16/9] lg:aspect-[21/9] min-h-[140px] sm:min-h-[220px] lg:min-h-[300px] touch-pan-y"
+          class="relative w-full overflow-hidden bg-surface-100 dark:bg-surface-900 aspect-[2.1/1] sm:aspect-[2.5/1] md:aspect-[2.8/1] lg:aspect-[3.2/1] min-h-[160px] sm:min-h-[200px] lg:min-h-[260px] max-h-[190px] sm:max-h-[270px] md:max-h-[320px] lg:max-h-[360px] touch-pan-y"
           @touchstart="handleTouchStart"
           @touchmove="handleTouchMove"
           @touchend="handleTouchEnd"
@@ -395,43 +395,41 @@ onUnmounted(() => {
             <img
               :src="slide.src"
               :alt="slide.title"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-cover object-center"
               :loading="idx === 0 ? 'eager' : 'lazy'"
             />
 
             <!-- Gradient overlay for text readability -->
             <div
-              class="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent"
+              class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent"
             ></div>
 
             <!-- Caption overlay -->
             <div
-              class="absolute inset-0 flex items-center justify-start px-5 sm:px-8 md:px-10 lg:px-14"
+              class="absolute inset-0 flex items-center justify-start px-5 sm:px-8 md:px-10 lg:px-12"
             >
               <div
-                class="max-w-lg sm:max-w-xl text-left pointer-events-auto"
+                class="max-w-md sm:max-w-lg lg:max-w-xl text-left pointer-events-auto"
               >
-                
-
                 <!-- Title -->
                 <h2
-                  class="banner-title text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] text-balance drop-shadow-lg"
+                  class="banner-title text-base sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-extrabold text-white leading-tight text-balance drop-shadow-lg"
                 >
                   {{ slide.title }}
                 </h2>
 
                 <!-- Subtitle -->
                 <p
-                  class="banner-subtitle mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-white/80 max-w-md text-balance leading-relaxed drop-shadow"
+                  class="banner-subtitle mt-1 sm:mt-1.5 text-xs sm:text-sm text-white/80 max-w-md text-balance leading-relaxed drop-shadow line-clamp-2 sm:line-clamp-none"
                 >
                   {{ slide.subtitle }}
                 </p>
 
                 <!-- CTA Button -->
-                <div class="banner-cta mt-3 sm:mt-4 md:mt-5">
+                <div class="banner-cta mt-2 sm:mt-3 lg:mt-3.5">
                   <button
                     @click="navigateToGame(slide.ctaGameCode)"
-                    class="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                    class="inline-flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
                   >
                     {{ slide.cta }}
                     <svg
@@ -505,7 +503,7 @@ onUnmounted(() => {
       </div>
 
       <!-- ═══ LOADING STATE ═══ -->
-      <div v-if="loading" class="max-w-6xl mx-auto space-y-10">
+      <div v-if="loading" class="w-full space-y-8 sm:space-y-10">
         <div>
           <div class="flex items-center gap-3 mb-5 sm:mb-6">
             <div
@@ -576,7 +574,7 @@ onUnmounted(() => {
       <!-- ═══ GAMES CONTENT ═══ -->
       <div
         v-else
-        class="max-w-6xl mx-auto space-y-10 sm:space-y-12 lg:space-y-16"
+        class="w-full space-y-8 sm:space-y-10 lg:space-y-12"
       >
         <!-- ─── FEATURED GAMES (Top Games 🇰🇭) ─── -->
         <div v-if="featured.length > 0" ref="featuredRef">
