@@ -607,16 +607,13 @@ onUnmounted(() => {
         v-else
         class="w-full space-y-8 sm:space-y-10 lg:space-y-12"
       >
-        <!-- ─── FEATURED GAMES (Top Games 🇰🇭) ─── -->
+        <!-- ─── FEATURED GAMES (Top Games) ─── -->
         <div v-if="featured.length > 0" ref="featuredRef">
           <div class="flex items-center justify-between mb-3 sm:mb-6">
             <div class="flex items-center gap-2.5 sm:gap-3">
               <div class="w-1.5 h-5 sm:h-6 rounded-full bg-gradient-to-b from-[#FF385C] to-amber-500"></div>
-              <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+              <h2 class="text-sm sm:text-lg font-extrabold text-white uppercase tracking-wider">
                 Top Games
-                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-[#FF385C]/20 text-[#FF385C] border border-[#FF385C]/30">
-                  Fast Delivery
-                </span>
               </h2>
             </div>
             <span class="sm:hidden text-[10px] font-medium text-slate-400 flex items-center gap-0.5 shrink-0">
